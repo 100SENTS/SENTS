@@ -39,7 +39,11 @@ const MANAGER_ABI = [
   "function feeRewardPerTokenStored(address) view returns (uint256)",
   "function lpRewardPerTokenStored() view returns (uint256)",
   "function stablecoins(uint256) view returns (address)",
-  "function getStablecoins() view returns (address[])"
+  "function getStablecoins() view returns (address[])",
+  "function isForgeAsset(address) view returns (bool)",
+  "function assetRates(address) view returns (uint256)",
+  "function singleStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)",
+  "function lpStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)"
 ];
 
 const ERC20_ABI = [
@@ -65,7 +69,7 @@ const SENTS_ABI = [
 ];
 
 // ==============================================
-// APPROVED ASSETS (PulseChain Mainnet)
+// APPROVED ASSETS (Stablecoins only)
 // ==============================================
 const MINT_TOKENS = [
   { symbol: 'DAI', name: 'Dai from Ethereum', addr: "0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals: 18 },
@@ -74,6 +78,7 @@ const MINT_TOKENS = [
 ];
 
 const RICH_TOKENS = [
+  { symbol: 'WPLS', addr: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27", decimals: 18 },
   { symbol: 'PLSX', addr: "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals: 18 },
   { symbol: 'INC', addr: "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals: 18 },
   { symbol: 'HEX', addr: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals: 8 },
@@ -214,6 +219,21 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
+  const [userBalance, setUserBalance] = useState('0');
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!wallet || !provider || !selectedToken) return;
+      try {
+        const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, provider);
+        const bal = await tokenContract.balanceOf(wallet);
+        setUserBalance(ethers.utils.formatUnits(bal, selectedToken.decimals));
+      } catch (e) {
+        setUserBalance('0');
+      }
+    };
+    fetchBalance();
+  }, [wallet, provider, selectedToken]);
 
   const handleMint = async () => {
     if (!wallet) return connect();
@@ -224,11 +244,9 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, signer);
 
-      // Fixed Cost: 1000 Tokens (DAI/USDC/USDT) per 1 "The 100" Token
       const costAmount = amount * 1000;
       const costWei = ethers.utils.parseUnits(costAmount.toString(), selectedToken.decimals);
 
-      // 1. Check Allowance
       const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
       if (allowance.lt(costWei)) {
         const approveTx = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
@@ -236,7 +254,6 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
         await approveTx.wait();
       }
 
-      // 2. Mint
       setTxState(s => ({ ...s, status: 'pending', step: 'Minting "The 100"...' }));
       const mintAmountWei = ethers.utils.parseUnits(amount.toString(), 18);
       const tx = await manager.mintThe100WithToken(selectedToken.addr, mintAmountWei);
@@ -246,7 +263,7 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
       updateBalances();
     } catch (e) {
       console.error(e);
-      setTxState({ open: true, status: 'error', title: 'Transaction Failed' });
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
     }
   };
 
@@ -254,7 +271,6 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
     <div className="view-enter max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start px-4">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
 
-      {/* Left Column – Info */}
       <div className="space-y-6">
         <h1 className="text-6xl font-black text-white leading-none tracking-tighter">
           MINT 100.<br />
@@ -273,7 +289,6 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
           </p>
         </div>
 
-        {/* New info box about The 100 */}
         <div className="holo-card p-6 bg-black/50">
           <h4 className="text-md font-bold text-white mb-3 font-mono flex items-center gap-2">
             <Hexagon size={16} className="text-[var(--neon-yellow)]" /> Why hold <span className="text-[var(--neon-yellow)]">The 100</span>?
@@ -292,32 +307,23 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
         <DexChart pairAddress="0xE56043671df55dE5CDf8459710433C10324DE0aE" />
       </div>
 
-      {/* Right Column – Mint Form */}
       <div className="holo-card p-8 bg-black/80">
         <div className="space-y-6">
           <div>
             <label className="text-xs text-gray-500 font-mono block mb-2">QUANTITY</label>
             <div className="flex items-center bg-[#111] border border-white/10 p-2">
-              <button
-                onClick={() => setAmount(Math.max(0.1, parseFloat((amount - 0.1).toFixed(1))))}
-                className="p-2 hover:text-white"
-              >
-                <Minus size={16} />
-              </button>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="flex-1 bg-transparent text-center font-mono text-2xl outline-none"
-                step="0.1"
-                min="0.1"
-              />
-              <button
-                onClick={() => setAmount(parseFloat((amount + 0.1).toFixed(1)))}
-                className="p-2 hover:text-white"
-              >
-                <Plus size={16} />
-              </button>
+              <button onClick={() => setAmount(Math.max(0.1, parseFloat((amount-0.1).toFixed(1))))} className="p-2 hover:text-white"><Minus size={16}/></button>
+              <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 bg-transparent text-center font-mono text-2xl outline-none" step="0.1" min="0.1" />
+              <button onClick={() => setAmount(parseFloat((amount+0.1).toFixed(1)))} className="p-2 hover:text-white"><Plus size={16}/></button>
+            </div>
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(4)} {selectedToken.symbol}</span>
+              <div className="flex gap-2">
+                <button onClick={() => setAmount(parseFloat((userBalance * 0.25 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
+                <button onClick={() => setAmount(parseFloat((userBalance * 0.5 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
+                <button onClick={() => setAmount(parseFloat((userBalance * 0.75 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
+                <button onClick={() => setAmount(parseFloat((userBalance / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
+              </div>
             </div>
           </div>
 
@@ -355,7 +361,7 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
 };
 
 // ==============================================
-// FORGE INTERFACE – Enhanced error handling
+// FORGE INTERFACE – Enhanced error handling, balance, percentages
 // ==============================================
 const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
   const [mode, setMode] = useState('forge'); // 'forge' or 'unforge'
@@ -364,8 +370,9 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
   const [recipient, setRecipient] = useState('');
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '', error: '' });
   const [allowance, setAllowance] = useState(null);
+  const [userBalance, setUserBalance] = useState('0');
 
-  // Fetch allowance whenever token, amount, or wallet changes
+  // Fetch allowance
   useEffect(() => {
     const fetchAllowance = async () => {
       if (!wallet || !provider || !amount) return;
@@ -380,12 +387,32 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
         const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
         setAllowance(allowanceWei);
       } catch (e) {
-        console.error('Allowance fetch failed', e);
         setAllowance(null);
       }
     };
     fetchAllowance();
   }, [wallet, provider, mode, token, amount]);
+
+  // Fetch user balance
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!wallet || !provider) return;
+      try {
+        if (mode === 'forge') {
+          const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, provider);
+          const bal = await tokenContract.balanceOf(wallet);
+          setUserBalance(ethers.utils.formatUnits(bal, token.decimals));
+        } else {
+          const sentsContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, provider);
+          const bal = await sentsContract.balanceOf(wallet);
+          setUserBalance(ethers.utils.formatUnits(bal, 18));
+        }
+      } catch (e) {
+        setUserBalance('0');
+      }
+    };
+    fetchBalance();
+  }, [wallet, provider, mode, token]);
 
   const handleForge = async () => {
     if (!wallet) return connect();
@@ -404,7 +431,6 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
         const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
         const valWei = ethers.utils.parseUnits(amount, token.decimals);
 
-        // Check if token is forge‑able
         const isForge = await manager.isForgeAsset(token.addr);
         if (!isForge) throw new Error('Token not enabled for forging');
 
@@ -420,7 +446,6 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
         await tx.wait();
         setTxState({ open: true, status: 'success', title: 'Forge Complete', hash: tx.hash });
       } else {
-        // Unforge
         const sentsContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
         const sentsWei = ethers.utils.parseUnits(amount, 18);
 
@@ -511,6 +536,15 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
                 <span className="text-[var(--neon-yellow)] font-bold font-mono pt-2">SENTS</span>
               )}
             </div>
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(4)} {mode === 'forge' ? token.symbol : 'SENTS'}</span>
+              <div className="flex gap-2">
+                <button onClick={() => setAmount((userBalance * 0.25).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
+                <button onClick={() => setAmount((userBalance * 0.5).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
+                <button onClick={() => setAmount((userBalance * 0.75).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
+                <button onClick={() => setAmount(userBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
+              </div>
+            </div>
             {allowance && amount && mode === 'forge' && (
               <div className="text-xs text-gray-500 mt-2 font-mono">
                 Allowance: {ethers.utils.formatUnits(allowance, token.decimals)} {token.symbol}
@@ -586,17 +620,33 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
   const [pendingLp, setPendingLp] = useState('0');
   const [stablecoins, setStablecoins] = useState([]);
   const [decimalsMap, setDecimalsMap] = useState({});
-  const [feeRates, setFeeRates] = useState({}); // per stablecoin, in wei per second? We'll compute per day.
+  const [feeRates, setFeeRates] = useState({});
   const [lastUpdate, setLastUpdate] = useState(Date.now());
+  const [stakeBalance, setStakeBalance] = useState('0');
 
-  // Fetch all data
+  // Fetch stake token balance (100 or LP)
+  useEffect(() => {
+    const fetchStakeBalance = async () => {
+      if (!wallet || !provider) return;
+      try {
+        const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : '0x0000000000000000000000000000000000000000'; // Replace with real LP address
+        const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+        const bal = await tokenContract.balanceOf(wallet);
+        setStakeBalance(ethers.utils.formatUnits(bal, 18));
+      } catch (e) {
+        setStakeBalance('0');
+      }
+    };
+    fetchStakeBalance();
+  }, [wallet, provider, stakeType]);
+
+  // Fetch all staking data
   const fetchData = async () => {
     if (!wallet || !provider) return;
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
 
-      // Get user stake and total stake
       const userStakeWei = stakeType === 'single'
         ? (await manager.singleStakes(wallet)).amount
         : (await manager.lpStakes(wallet)).amount;
@@ -610,7 +660,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       const share = totalStakeWei.isZero() ? 0 : userStakeWei.mul(10000).div(totalStakeWei).toNumber() / 100;
       setUserShare(share);
 
-      // Get stablecoin list and decimals
       const stableList = await manager.getStablecoins();
       setStablecoins(stableList);
 
@@ -625,7 +674,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       }
       setDecimalsMap(decimals);
 
-      // Fetch pending fees
       const fees = {};
       for (let addr of stableList) {
         const pending = await manager.pendingFeeRewards(wallet, stakeType === 'lp', addr);
@@ -638,22 +686,16 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
         setPendingLp(ethers.utils.formatUnits(lpReward, 18));
       }
 
-      // Fetch current fee rates (reward per token per second? We'll compute per day using historical snapshot)
-      // For a simple estimate, we can compute the increase over the last 10 seconds if we had a previous snapshot.
-      // We'll store a snapshot in local state and compute rate on each fetch.
-      // This is a simplified version – a proper indexer would be better.
-      const newFeeRates = {};
       const now = Date.now();
       const timeDiffSeconds = (now - lastUpdate) / 1000;
       if (timeDiffSeconds > 5 && lastUpdate !== Date.now()) {
+        const newFeeRates = {};
         for (let addr of stableList) {
           const currentRpt = await manager.feeRewardPerTokenStored(addr);
           const prevRpt = feeRates[addr]?.rpt || ethers.BigNumber.from(0);
           if (prevRpt.gt(0) && currentRpt.gt(prevRpt) && timeDiffSeconds > 0) {
             const increase = currentRpt.sub(prevRpt);
-            // annualised rate = increase per second * seconds per year
             const perSecond = increase.mul(ethers.constants.WeiPerEther).div(ethers.BigNumber.from(Math.floor(timeDiffSeconds * 1e18)));
-            // we store the annualised multiplier (per token)
             newFeeRates[addr] = {
               rpt: currentRpt,
               annualPerToken: perSecond.mul(365 * 24 * 3600).div(ethers.constants.WeiPerEther),
@@ -672,15 +714,99 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000); // refresh every 30s
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [wallet, provider, stakeType]);
 
-  // Stake/Unstake handlers (unchanged, omitted for brevity – keep your existing ones)
-  const handleStake = async () => { /* ... */ };
-  const handleUnstake = async () => { /* ... */ };
-  const handleClaimFees = async () => { /* ... */ };
-  const handleClaimLp = async () => { /* ... */ };
+  const handleStake = async () => {
+    if (!wallet) return connect();
+    if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'STAKE 100' : 'STAKE LP' });
+
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const lpTokenAddress = '0x0000000000000000000000000000000000000000'; // Replace later
+      const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : lpTokenAddress;
+      const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+      const stakeWei = ethers.utils.parseUnits(amount, 18);
+
+      const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
+      if (allowance.lt(stakeWei)) {
+        const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
+        setTxState(s => ({ ...s, step: 'Approving...' }));
+        await txApp.wait();
+      }
+
+      setTxState(s => ({ ...s, status: 'pending', step: 'Staking...' }));
+      const tx = await manager.stake(stakeWei, stakeType === 'lp');
+      await tx.wait();
+
+      setTxState({ open: true, status: 'success', title: 'Stake Successful', hash: tx.hash });
+      updateBalances();
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleUnstake = async () => {
+    if (!wallet) return connect();
+    if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'UNSTAKE 100' : 'UNSTAKE LP' });
+
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const stakeWei = ethers.utils.parseUnits(amount, 18);
+
+      setTxState(s => ({ ...s, status: 'pending', step: 'Unstaking...' }));
+      const tx = await manager.unstake(stakeWei, stakeType === 'lp');
+      await tx.wait();
+
+      setTxState({ open: true, status: 'success', title: 'Unstake Successful', hash: tx.hash });
+      updateBalances();
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleClaimFees = async () => {
+    if (!wallet) return connect();
+    setTxState({ open: true, status: 'pending', title: 'CLAIMING FEES' });
+
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const tx = await manager.claimFees(stakeType === 'lp');
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'Fees Claimed', hash: tx.hash });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleClaimLp = async () => {
+    if (!wallet) return connect();
+    setTxState({ open: true, status: 'pending', title: 'CLAIMING LP REWARDS' });
+
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const tx = await manager.claimLpReward();
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'LP Rewards Claimed', hash: tx.hash });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
 
   return (
     <div className="view-enter max-w-6xl mx-auto px-4">
@@ -709,7 +835,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
 
       {/* Staking Analytics Panel */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {/* User Stats */}
         <div className="holo-card p-6 bg-black/50">
           <h3 className="text-lg font-mono text-white mb-4">YOUR POSITION</h3>
           <div className="space-y-3">
@@ -728,7 +853,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
           </div>
         </div>
 
-        {/* Pending Rewards */}
         <div className="holo-card p-6 bg-black/50">
           <h3 className="text-lg font-mono text-white mb-4">PENDING REWARDS</h3>
           <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -750,7 +874,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
           </div>
         </div>
 
-        {/* Estimated APY / Projections */}
         <div className="holo-card p-6 bg-black/50">
           <h3 className="text-lg font-mono text-white mb-4">PROJECTED REWARDS</h3>
           {userShare > 0 && (
@@ -808,6 +931,15 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
               placeholder="0.0"
               className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
             />
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="text-gray-500">Balance: {parseFloat(stakeBalance).toFixed(4)} {stakeType === 'single' ? '100' : 'LP'}</span>
+              <div className="flex gap-2">
+                <button onClick={() => setAmount((stakeBalance * 0.25).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.5).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.75).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
+                <button onClick={() => setAmount(stakeBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
+              </div>
+            </div>
           </div>
           <div className="flex gap-4">
             <button
@@ -893,11 +1025,51 @@ const App = () => {
   const [provider, setProvider] = useState(null);
   const [rampOpen, setRampOpen] = useState(false);
 
+  // Initialize provider
   useEffect(() => {
-     if (window.ethereum) {
-       const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
-       setProvider(ethProvider);
-     }
+    if (window.ethereum) {
+      const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
+      setProvider(ethProvider);
+    }
+  }, []);
+
+  // Load saved wallet from localStorage
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('100sents_wallet');
+    if (savedWallet && provider) {
+      setWallet(savedWallet);
+      updateBalances();
+    }
+  }, [provider]);
+
+  // Save wallet to localStorage when it changes
+  useEffect(() => {
+    if (wallet) {
+      localStorage.setItem('100sents_wallet', wallet);
+    } else {
+      localStorage.removeItem('100sents_wallet');
+    }
+  }, [wallet]);
+
+  // Listen for account/chain changes
+  useEffect(() => {
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts) => {
+        if (accounts.length > 0) {
+          setWallet(accounts[0]);
+          updateBalances();
+        } else {
+          setWallet(null);
+        }
+      };
+      const handleChainChanged = () => window.location.reload();
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+      };
+    }
   }, []);
 
   const updateBalances = async () => {
@@ -1012,9 +1184,4 @@ const App = () => {
   );
 };
 
-
 export default App;
-
-
-
-
