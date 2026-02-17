@@ -15,8 +15,8 @@ import {
 // DEPLOYED CONTRACT ADDRESSES – UPDATED
 // ==============================================
 const MANAGER_ADDRESS = "0x94681015615943E7cdB717c9689Ef7dbD7d85816";
-const TOKEN_100_ADDRESS = "0xaad060534d1BE34EFD24F919c0fa051F67b80C7F";
-const SENTS_ADDRESS = "0x7dF16f1c80A5c1AE4922dF141B976eD883d9F5b2";
+const TOKEN_100_ADDRESS = "0x042e8511E034eFB62e35393432E3Cc364ADB0EBe";
+const SENTS_ADDRESS = "0x1CAa88C07D9395fA9B75FeA418501E602dB5fD99";
 
 // LP Token Addresses
 const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F"; // ⚠️ Please verify this is the correct mainnet LP token
@@ -1371,3 +1371,4 @@ const App = () => {
 };
 
 export default App;
+
