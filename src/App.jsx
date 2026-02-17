@@ -253,7 +253,7 @@ const PROJECT_DETAILS = {
 };
 
 // ==============================================
-// STYLES
+// STYLES (with restored grid and flow animation)
 // ==============================================
 const baseStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
@@ -332,6 +332,56 @@ const baseStyles = `
   .bg-neon-orange { background-color: var(--accent-secondary); }
   .border-neon-yellow { border-color: var(--accent-primary); }
   .border-neon-orange { border-color: var(--accent-secondary); }
+
+  /* Flow animation */
+  .flow-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 2rem;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+    animation: pulse 2s infinite;
+    animation-delay: calc(var(--step) * 0.5s);
+  }
+  .flow-step .icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    animation: bounce 2s infinite;
+  }
+  .flow-arrow {
+    font-size: 2rem;
+    color: var(--accent-secondary);
+    animation: slide 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes slide {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+  }
 `;
 
 // ==============================================
@@ -488,6 +538,44 @@ const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   );
 };
 
+// Flow Animation Component (replaces video)
+const FlowAnimation = () => (
+  <div className="holo-card p-8 max-w-4xl mx-auto">
+    <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
+    <div className="flow-container">
+      <div className="flow-step" style={{ '--step': 0 }}>
+        <div className="icon"><Coins size={24} /></div>
+        <div className="text-sm font-mono">Mint 100</div>
+      </div>
+      <div className="flow-arrow">→</div>
+      <div className="flow-step" style={{ '--step': 1 }}>
+        <div className="icon"><Zap size={24} /></div>
+        <div className="text-sm font-mono">Single Stake</div>
+      </div>
+      <div className="flow-arrow">→</div>
+      <div className="flow-step" style={{ '--step': 2 }}>
+        <div className="icon"><TrendingUp size={24} /></div>
+        <div className="text-sm font-mono">Earn SENTS</div>
+      </div>
+      <div className="flow-arrow">→</div>
+      <div className="flow-step" style={{ '--step': 3 }}>
+        <div className="icon"><Layers size={24} /></div>
+        <div className="text-sm font-mono">LP 100 + SENTS</div>
+      </div>
+      <div className="flow-arrow">→</div>
+      <div className="flow-step" style={{ '--step': 4 }}>
+        <div className="icon"><Box size={24} /></div>
+        <div className="text-sm font-mono">Stake LP</div>
+      </div>
+      <div className="flow-arrow">→</div>
+      <div className="flow-step" style={{ '--step': 5 }}>
+        <div className="icon"><Rocket size={24} /></div>
+        <div className="text-sm font-mono">Earn More SENTS + 100</div>
+      </div>
+    </div>
+  </div>
+);
+
 // Landing Page
 const LandingPage = ({ setActiveTab }) => (
   <div className="view-enter max-w-6xl mx-auto px-4 py-12 space-y-16">
@@ -558,23 +646,8 @@ const LandingPage = ({ setActiveTab }) => (
       </div>
     </div>
 
-    {/* Explainer Video */}
-    <div className="holo-card p-8 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
-      <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-        <iframe
-          className="w-full h-full"
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ" // Replace with your actual video
-          title="Explainer Video"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
-      </div>
-      <p className="text-sm text-[var(--text-secondary)] mt-4 text-center">
-        Mint 100 → Single Stake → Earn SENTS → LP 100 + SENTS → Stake LP → Earn More SENTS + 100 Inflation
-      </p>
-    </div>
+    {/* Flow Animation (replaces video) */}
+    <FlowAnimation />
 
     {/* The Constant */}
     <div className="holo-card p-8 text-center max-w-3xl mx-auto">
@@ -1021,7 +1094,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
   const [allowance, setAllowance] = useState('0');
   const [managerBalance, setManagerBalance] = useState('0');
 
-  // Check if LP token is set
   useEffect(() => {
     const checkLpToken = async () => {
       if (!provider) return;
@@ -1036,7 +1108,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
     checkLpToken();
   }, [provider]);
 
-  // Fetch stake token balance (100 or LP)
   useEffect(() => {
     const fetchStakeBalance = async () => {
       if (!wallet || !provider) return;
@@ -1059,7 +1130,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
     fetchStakeBalance();
   }, [wallet, provider, stakeType]);
 
-  // Fetch all staking data
   const fetchData = async () => {
     if (!wallet || !provider) return;
     try {
