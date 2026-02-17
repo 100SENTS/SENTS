@@ -210,32 +210,65 @@ const LandingPage = ({ setActiveTab }) => (
 );
 
 // ==============================================
-// MINT VIEW
+// MINT VIEW – Now with dynamic rate fetching
 // ==============================================
 const MintView = ({ wallet, connect, provider, updateBalances }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
+  const [rate, setRate] = useState(null);
+  const [costWei, setCostWei] = useState(ethers.BigNumber.from(0));
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
+
+  // Fetch rate whenever token or provider changes
+  useEffect(() => {
+    if (!provider || !wallet) return;
+    const fetchRate = async () => {
+      try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+        const assetRate = await manager.assetRates(selectedToken.addr);
+        setRate(assetRate);
+      } catch (e) {
+        console.error("Failed to fetch rate", e);
+        setRate(null);
+      }
+    };
+    fetchRate();
+  }, [selectedToken, provider, wallet]);
+
+  // Compute cost in token units whenever amount, rate, or token changes
+  useEffect(() => {
+    if (!rate) {
+      setCostWei(ethers.BigNumber.from(0));
+      return;
+    }
+    try {
+      const amountWei = ethers.utils.parseUnits(amount.toString(), 18); // "The 100" has 18 decimals
+      const cost = amountWei.mul(rate).div(ethers.constants.WeiPerEther);
+      setCostWei(cost);
+    } catch (e) {
+      setCostWei(ethers.BigNumber.from(0));
+    }
+  }, [amount, rate]);
 
   const handleMint = async () => {
     if (!wallet) return connect();
+    if (!rate) {
+      alert("Rate not available for this token");
+      return;
+    }
     setTxState({ open: true, status: 'approving', title: `Minting ${amount} x "100"`, step: 'Preparing...' });
 
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, signer);
-      
-      // Fixed Cost: 1000 Tokens (DAI/USDC/USDT) per 1 "The 100" Token
-      const costAmount = amount * 1000;
-      const costWei = ethers.utils.parseUnits(costAmount.toString(), selectedToken.decimals);
-      
-      // 1. Check Allowance
+
+      // 1. Check Allowance using the computed costWei
       const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
       if (allowance.lt(costWei)) {
-         const approveTx = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
-         setTxState(s => ({ ...s, status: 'pending', step: 'Approving Token...' }));
-         await approveTx.wait();
+        const approveTx = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
+        setTxState(s => ({ ...s, status: 'pending', step: 'Approving Token...' }));
+        await approveTx.wait();
       }
 
       // 2. Mint
@@ -243,7 +276,7 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
       const mintAmountWei = ethers.utils.parseUnits(amount.toString(), 18);
       const tx = await manager.mintThe100WithToken(selectedToken.addr, mintAmountWei);
       await tx.wait();
-      
+
       setTxState({ open: true, status: 'success', title: 'Mint Successful', hash: tx.hash });
       updateBalances();
     } catch (e) {
@@ -252,15 +285,18 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
     }
   };
 
+  // Format the cost for display
+  const displayCost = costWei.isZero() ? '...' : ethers.utils.formatUnits(costWei, selectedToken.decimals);
+
   return (
     <div className="view-enter max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start px-4">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({open:false})} {...txState} />
-      
+
       <div className="space-y-6">
          <h1 className="text-6xl font-black text-white leading-none tracking-tighter">MINT 100.<br/><span className="text-[var(--neon-yellow)]">BUILD SENTS.</span></h1>
          <div className="holo-card p-6 border-l-4 border-[var(--neon-yellow)]">
             <h3 className="text-lg font-bold text-[var(--neon-yellow)] font-mono mb-2 flex items-center gap-2"><AlertTriangle size={16}/> MINTING PHASE ACTIVE</h3>
-            <p className="text-sm text-gray-400 mb-2">Cost is hard-pegged at <strong>$1,000 Equivalent</strong> in Stablecoins.</p>
+            <p className="text-sm text-gray-400 mb-2">Cost is determined by on‑chain rates. For stablecoins this is <strong>$1,000 Equivalent</strong>.</p>
             <p className="text-xs text-gray-500 italic">Arbitrage Opportunity: If market price > $1,000, mint here and sell to stabilize.</p>
          </div>
          <DexChart pairAddress="0xE56043671df55dE5CDf8459710433C10324DE0aE" />
@@ -277,13 +313,18 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
                </div>
             </div>
             <div>
-               <label className="text-xs text-gray-500 font-mono block mb-2">PAYMENT ASSET (ETH STABLES)</label>
+               <label className="text-xs text-gray-500 font-mono block mb-2">PAYMENT ASSET (ERC20)</label>
                <select className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none" onChange={e => setSelectedToken(MINT_TOKENS.find(t => t.symbol === e.target.value))}>
                   {MINT_TOKENS.map(t => <option key={t.symbol} value={t.symbol}>{t.name}</option>)}
                </select>
             </div>
-            <div className="flex justify-between bg-white/5 p-4 rounded"><span className="text-gray-400 text-xs font-mono">TOTAL COST</span><span className="text-white font-mono text-xl">{(1000 * amount).toLocaleString()} {selectedToken.symbol}</span></div>
-            <button onClick={handleMint} className="w-full py-4 bg-[var(--neon-yellow)] text-black font-bold font-mono hover:bg-[var(--neon-orange)] transition-colors uppercase tracking-widest">{wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}</button>
+            <div className="flex justify-between bg-white/5 p-4 rounded">
+               <span className="text-gray-400 text-xs font-mono">TOTAL COST</span>
+               <span className="text-white font-mono text-xl">{displayCost} {selectedToken.symbol}</span>
+            </div>
+            <button onClick={handleMint} className="w-full py-4 bg-[var(--neon-yellow)] text-black font-bold font-mono hover:bg-[var(--neon-orange)] transition-colors uppercase tracking-widest">
+              {wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}
+            </button>
          </div>
       </div>
     </div>
@@ -784,3 +825,4 @@ const App = () => {
 
 
 export default App;
+
