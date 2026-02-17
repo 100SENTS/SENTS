@@ -8,7 +8,9 @@ import {
   Box, Sparkles, Network, XCircle, Ghost,
   Fingerprint, FileKey, X, Radio, Hexagon, Rocket, Map,
   ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock,
-  History, Repeat, LinkIcon
+  History, Repeat, Sun, Moon, Palette, Send, ShoppingCart,
+  CreditCard, Repeat as SwapIcon, Menu, X as CloseIcon,
+  Copy
 } from 'lucide-react';
 
 // ==============================================
@@ -16,10 +18,10 @@ import {
 // ==============================================
 const MANAGER_ADDRESS = "0x94681015615943E7cdB717c9689Ef7dbD7d85816";
 const TOKEN_100_ADDRESS = "0x042e8511E034eFB62e35393432E3Cc364ADB0EBe";
-const SENTS_ADDRESS = "0x1CAa88C07D9395fA9B75FeA418501E602dB5fD99";
+const SENTS_ADDRESS = "0x7dF16f1c80A5c1AE4922dF141B976eD883d9F5b2";
 
 // LP Token Addresses
-const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F"; // ⚠️ Please verify this is the correct mainnet LP token
+const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F";
 const LP_100_DAI = "0x22914141b821e394804d767185909901FdA2efb0";
 const LP_SENTS_DAI = "0xda7772F53f4112E8537690cb37907d51C17b3630";
 
@@ -28,6 +30,12 @@ const DAI_100_PAIR = "0x22914141b821e394804d767185909901FdA2efb0";
 
 const PULSECHAIN_CHAIN_ID = '0x171'; // 369
 const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
+
+// On/Off Ramp Links
+const RAMP_LINKS = {
+  provex: "https://app.provex.com",
+  peer: "https://peer.xyz"
+};
 
 // ==============================================
 // COMPLETE ABI FOR MANAGER
@@ -69,7 +77,7 @@ const ERC20_ABI = [
 ];
 
 // ==============================================
-// APPROVED ASSETS (Stablecoins only)
+// APPROVED ASSETS
 // ==============================================
 const MINT_TOKENS = [
   { symbol: 'DAI', name: 'Dai from Ethereum', addr: "0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals: 18 },
@@ -93,7 +101,123 @@ const RICH_TOKENS = [
 ];
 
 // ==============================================
-// PROJECT DETAILS (Enhanced explanations)
+// THEMES
+// ==============================================
+const THEMES = {
+  dark: {
+    '--bg-primary': '#050505',
+    '--bg-secondary': '#111111',
+    '--text-primary': '#ffffff',
+    '--text-secondary': '#9ca3af',
+    '--accent-primary': '#FFB347',
+    '--accent-secondary': '#FF8C00',
+    '--border': 'rgba(255,255,255,0.1)',
+    '--card-bg': 'rgba(10,15,20,0.85)',
+  },
+  light: {
+    '--bg-primary': '#f5f5f5',
+    '--bg-secondary': '#ffffff',
+    '--text-primary': '#111111',
+    '--text-secondary': '#4b5563',
+    '--accent-primary': '#FF8C00',
+    '--accent-secondary': '#FFB347',
+    '--border': 'rgba(0,0,0,0.1)',
+    '--card-bg': 'rgba(255,255,255,0.9)',
+  },
+  matrix: {
+    '--bg-primary': '#0f0f0f',
+    '--bg-secondary': '#1a1a1a',
+    '--text-primary': '#00ff41',
+    '--text-secondary': '#00cc33',
+    '--accent-primary': '#00ff41',
+    '--accent-secondary': '#00aa22',
+    '--border': 'rgba(0,255,65,0.2)',
+    '--card-bg': '#0a0a0a',
+  },
+  heaven: {
+    '--bg-primary': '#87CEEB',
+    '--bg-secondary': '#B0E0E6',
+    '--text-primary': '#2c3e50',
+    '--text-secondary': '#34495e',
+    '--accent-primary': '#f1c40f',
+    '--accent-secondary': '#f39c12',
+    '--border': 'rgba(255,255,255,0.3)',
+    '--card-bg': 'rgba(255,255,255,0.7)',
+  },
+  cold: {
+    '--bg-primary': '#1e3c72',
+    '--bg-secondary': '#2a5298',
+    '--text-primary': '#e0f2fe',
+    '--text-secondary': '#bae6fd',
+    '--accent-primary': '#38bdf8',
+    '--accent-secondary': '#0284c7',
+    '--border': 'rgba(56,189,248,0.3)',
+    '--card-bg': 'rgba(30,60,114,0.8)',
+  },
+  hot: {
+    '--bg-primary': '#b91c1c',
+    '--bg-secondary': '#991b1b',
+    '--text-primary': '#fee2e2',
+    '--text-secondary': '#fecaca',
+    '--accent-primary': '#f97316',
+    '--accent-secondary': '#ea580c',
+    '--border': 'rgba(249,115,22,0.3)',
+    '--card-bg': 'rgba(185,28,28,0.8)',
+  },
+  weird: {
+    '--bg-primary': '#6b21a8',
+    '--bg-secondary': '#86198f',
+    '--text-primary': '#fae8ff',
+    '--text-secondary': '#f5d0fe',
+    '--accent-primary': '#c084fc',
+    '--accent-secondary': '#a855f7',
+    '--border': 'linear-gradient(45deg, #ff00ff, #00ffff)',
+    '--card-bg': 'rgba(107,33,168,0.7)',
+  },
+  cyberpunk: {
+    '--bg-primary': '#0d0d0d',
+    '--bg-secondary': '#1a1a1a',
+    '--text-primary': '#ff00ff',
+    '--text-secondary': '#00ffff',
+    '--accent-primary': '#ff00ff',
+    '--accent-secondary': '#00ffff',
+    '--border': 'linear-gradient(90deg, #ff00ff, #00ffff)',
+    '--card-bg': '#111111',
+  },
+  religious: {
+    '--bg-primary': '#f7f3e9',
+    '--bg-secondary': '#e6d9c2',
+    '--text-primary': '#5e4b3a',
+    '--text-secondary': '#7f6b5a',
+    '--accent-primary': '#c9a87c',
+    '--accent-secondary': '#b39264',
+    '--border': '#d4b185',
+    '--card-bg': '#fef9f0',
+  },
+  rich: {
+    '--bg-primary': '#1a1a2e',
+    '--bg-secondary': '#16213e',
+    '--text-primary': '#e0e0e0',
+    '--text-secondary': '#b0b0b0',
+    '--accent-primary': '#e94560',
+    '--accent-secondary': '#0f3460',
+    '--border': 'rgba(233,69,96,0.3)',
+    '--card-bg': '#0f3460',
+  },
+  poor: {
+    '--bg-primary': '#2d2d2d',
+    '--bg-secondary': '#3d3d3d',
+    '--text-primary': '#a0a0a0',
+    '--text-secondary': '#808080',
+    '--accent-primary': '#6d6d6d',
+    '--accent-secondary': '#5d5d5d',
+    '--border': '#4d4d4d',
+    '--card-bg': '#353535',
+  },
+};
+
+// ==============================================
+// PROJECT DETAILS
 // ==============================================
 const PROJECT_DETAILS = {
   overview: `100SENTS is a privacy‑centric stable unit protocol built on PulseChain. 
@@ -129,28 +253,113 @@ const PROJECT_DETAILS = {
 };
 
 // ==============================================
-// STYLES (Neon Yellow/Orange)
+// STYLES
 // ==============================================
-const STYLES = `
+const baseStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
-  :root { --neon-yellow: #FFB347; --neon-orange: #FF8C00; --deep-space: #050505; --panel-bg: rgba(10, 15, 20, 0.85); }
-  body { background-color: var(--deep-space); font-family: 'Rajdhani', sans-serif; color: #e0e0e0; overflow-x: hidden; }
+  :root {
+    --neon-yellow: #FFB347;
+    --neon-orange: #FF8C00;
+    --deep-space: #050505;
+    --panel-bg: rgba(10, 15, 20, 0.85);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+  }
   .font-mono { font-family: 'Share Tech Mono', monospace; }
-  .sci-fi-grid { position: fixed; top: 0; left: 0; width: 200%; height: 200%; background-image: linear-gradient(rgba(255, 179, 71, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 140, 0, 0.03) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px); animation: gridMove 20s linear infinite; pointer-events: none; z-index: 0; }
-  @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); } 100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); } }
-  .holo-card { background: var(--panel-bg); border: 1px solid rgba(255, 179, 71, 0.2); box-shadow: 0 0 20px rgba(255, 140, 0, 0.1); backdrop-filter: blur(10px); position: relative; overflow: hidden; }
-  .holo-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-yellow), transparent); animation: scanHorizontal 3s ease-in-out infinite; opacity: 0.5; }
-  @keyframes scanHorizontal { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-  .view-enter { animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  @keyframes zoomIn { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-  ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #000; } ::-webkit-scrollbar-thumb { background: #333; } ::-webkit-scrollbar-thumb:hover { background: var(--neon-yellow); }
-  .neon-yellow { color: var(--neon-yellow); }
-  .neon-orange { color: var(--neon-orange); }
-  .bg-neon-yellow { background-color: var(--neon-yellow); }
-  .bg-neon-orange { background-color: var(--neon-orange); }
-  .border-neon-yellow { border-color: var(--neon-yellow); }
-  .border-neon-orange { border-color: var(--neon-orange); }
+  .sci-fi-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255, 179, 71, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 140, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes gridMove {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+  }
+  .holo-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+  }
+  .holo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+    animation: scanHorizontal 3s ease-in-out infinite;
+    opacity: 0.5;
+  }
+  @keyframes scanHorizontal {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .view-enter {
+    animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.98) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb { background: var(--text-secondary); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+  .neon-yellow { color: var(--accent-primary); }
+  .neon-orange { color: var(--accent-secondary); }
+  .bg-neon-yellow { background-color: var(--accent-primary); }
+  .bg-neon-orange { background-color: var(--accent-secondary); }
+  .border-neon-yellow { border-color: var(--accent-primary); }
+  .border-neon-orange { border-color: var(--accent-secondary); }
 `;
+
+// ==============================================
+// HELPER: Copyable Address Component
+// ==============================================
+const CopyableAddress = ({ address, symbol, showSymbol = true }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center gap-1 group">
+      {showSymbol && <span className="font-bold">{symbol}</span>}
+      <button
+        onClick={handleCopy}
+        className="p-1 hover:bg-[var(--accent-primary)]/20 rounded transition-colors"
+        title={`Copy ${symbol} address`}
+      >
+        <Copy size={14} className="text-[var(--text-secondary)] group-hover:text-[var(--accent-primary)]" />
+      </button>
+      {copied && <span className="text-xs text-green-500">Copied!</span>}
+    </div>
+  );
+};
 
 // ==============================================
 // COMPONENTS
@@ -161,12 +370,12 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in">
-      <div className="holo-card w-full max-w-md p-1 border-l-4 border-l-[var(--neon-yellow)]">
+      <div className="holo-card w-full max-w-md p-1 border-l-4 border-l-[var(--accent-primary)]">
         <div className="bg-black/90 p-8 relative">
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-[var(--neon-yellow)]"><X size={20}/></button>
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-[var(--accent-primary)]"><X size={20}/></button>
           <div className="text-center">
-             {status === 'pending' && <RefreshCw className="animate-spin text-[var(--neon-yellow)] mx-auto mb-4" size={48} />}
-             {status === 'approving' && <Lock className="animate-pulse text-[var(--neon-orange)] mx-auto mb-4" size={48} />}
+             {status === 'pending' && <RefreshCw className="animate-spin text-[var(--accent-primary)] mx-auto mb-4" size={48} />}
+             {status === 'approving' && <Lock className="animate-pulse text-[var(--accent-secondary)] mx-auto mb-4" size={48} />}
              {status === 'success' && <CheckCircle className="text-green-500 mx-auto mb-4" size={48} />}
              {status === 'error' && <AlertTriangle className="text-red-500 mx-auto mb-4" size={48} />}
              
@@ -174,9 +383,9 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
                {status === 'approving' ? 'APPROVING TOKEN' : status === 'pending' ? 'CONFIRMING' : status === 'success' ? 'COMPLETE' : 'ERROR'}
              </h3>
              <p className="text-sm text-gray-400 font-mono mb-6">{title}</p>
-             {step && <div className="text-xs text-[var(--neon-yellow)] font-mono mb-4">{step}</div>}
+             {step && <div className="text-xs text-[var(--accent-primary)] font-mono mb-4">{step}</div>}
              
-             {hash && <a href={`https://scan.pulsechain.com/tx/${hash}`} target="_blank" rel="noreferrer" className="block text-xs text-[var(--neon-yellow)] hover:underline mb-4">View Transaction</a>}
+             {hash && <a href={`https://scan.pulsechain.com/tx/${hash}`} target="_blank" rel="noreferrer" className="block text-xs text-[var(--accent-primary)] hover:underline mb-4">View Transaction</a>}
           </div>
         </div>
       </div>
@@ -184,7 +393,7 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   );
 };
 
-// Dex Chart – Now using the live The 100/DAI pool
+// Dex Chart
 const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
   const [expanded, setExpanded] = useState(false);
   
@@ -192,7 +401,7 @@ const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
     return (
       <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
         <div className="flex justify-end mb-2">
-          <button onClick={() => setExpanded(false)} className="text-white flex items-center gap-2 font-mono hover:text-[var(--neon-yellow)]"><Minimize2 size={16}/> CLOSE VIEW</button>
+          <button onClick={() => setExpanded(false)} className="text-white flex items-center gap-2 font-mono hover:text-[var(--accent-primary)]"><Minimize2 size={16}/> CLOSE VIEW</button>
         </div>
         <iframe src={`https://dexscreener.com/pulsechain/${pairAddress}?embed=1&theme=dark`} className="w-full h-full border-0 rounded-lg"></iframe>
       </div>
@@ -200,7 +409,7 @@ const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
   }
   
   return (
-    <div className="w-full h-64 border border-white/10 bg-black/50 rounded-xl overflow-hidden relative group">
+    <div className="w-full h-96 border border-[var(--border)] bg-[var(--bg-secondary)] rounded-xl overflow-hidden relative group">
       <button onClick={() => setExpanded(true)} className="absolute top-2 right-2 bg-black/80 p-2 text-gray-400 hover:text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">
         <Maximize2 size={16} />
       </button>
@@ -210,34 +419,32 @@ const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
 };
 
 // Piteas Iframe
-const PiteasIframe = () => (
-  <div className="w-full h-[600px] rounded-lg overflow-hidden border border-white/10">
-    <iframe 
-      src="https://app.piteas.io" 
-      className="w-full h-full"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      title="Piteas DEX"
-    />
+const PiteasIframe = ({ onClose }) => (
+  <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
+    <div className="flex justify-end mb-2">
+      <button onClick={onClose} className="text-white flex items-center gap-2 font-mono hover:text-[var(--accent-primary)]"><X size={16}/> CLOSE</button>
+    </div>
+    <iframe src="https://app.piteas.io" className="w-full h-full border-0 rounded-lg" title="Piteas DEX" />
   </div>
 );
 
-// Recent Transactions
+// Recent Transactions (only used in Wallet)
 const RecentTransactions = ({ txs }) => {
   if (!txs.length) {
     return (
-      <div className="holo-card p-6 text-center text-gray-500 font-mono">
+      <div className="holo-card p-6 text-center text-[var(--text-secondary)] font-mono">
         No transactions yet.
       </div>
     );
   }
   return (
     <div className="holo-card p-4 max-h-80 overflow-y-auto">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-3 flex items-center gap-2"><History size={14} /> RECENT TRANSACTIONS</h3>
+      <h3 className="text-sm font-mono text-[var(--accent-primary)] mb-3 flex items-center gap-2"><History size={14} /> RECENT TRANSACTIONS</h3>
       {txs.map((tx, i) => (
-        <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 text-xs font-mono">
-          <span className="text-gray-400">{tx.type}</span>
-          <span className="text-white">{tx.amount}</span>
-          <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--neon-yellow)] hover:underline">
+        <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border)] text-xs font-mono">
+          <span className="text-[var(--text-secondary)]">{tx.type}</span>
+          <span className="text-[var(--text-primary)]">{tx.amount}</span>
+          <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">
             <ExternalLink size={12} />
           </a>
         </div>
@@ -246,66 +453,76 @@ const RecentTransactions = ({ txs }) => {
   );
 };
 
-// Project Info Sidebar
-const ProjectInfoSidebar = () => (
-  <div className="space-y-4">
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🌌 OVERVIEW</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.overview}</p>
-    </div>
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🔮 VISION</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.vision}</p>
-    </div>
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">📈 ARBITRAGE</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.arbitrage}</p>
-    </div>
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">💸 FEE DISTRIBUTION</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.fees}</p>
-    </div>
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🔒 BACKING</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.backing}</p>
-    </div>
-    <div className="holo-card p-4 bg-black/50">
-      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">📉 EMISSION & DEFLATION</h3>
-      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.emission}</p>
-    </div>
-  </div>
-);
+// Theme Switcher
+const ThemeSwitcher = ({ currentTheme, setTheme }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const themeNames = Object.keys(THEMES);
 
-// Landing Page (Enhanced)
-const LandingPage = ({ setActiveTab }) => (
-  <div className="view-enter max-w-6xl mx-auto px-4 py-12">
-    <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-      <div>
-        <h1 className="text-7xl font-black text-white mb-4 tracking-tighter">
-          100<span className="text-[var(--neon-yellow)]">SENTS</span>
-        </h1>
-        <p className="text-2xl text-gray-400 font-mono mb-6">
-          THE FUTURE OF FINANCIAL PRIVACY
-        </p>
-        <p className="text-gray-300 mb-8 text-lg">
-          A privacy‑centric stable unit aggregator and scarcity engine on PulseChain. 
-          Escape the centralized control system.
-        </p>
-        <div className="flex gap-4">
-          <button onClick={() => setActiveTab('mint')} className="px-6 py-3 bg-[var(--neon-yellow)] text-black font-bold font-mono hover:bg-[var(--neon-orange)] transition-colors">
-            MINT 100
-          </button>
-          <button onClick={() => setActiveTab('forge')} className="px-6 py-3 border border-[var(--neon-yellow)] text-[var(--neon-yellow)] font-mono hover:bg-[var(--neon-yellow)]/10">
-            FORGE SENTS
-          </button>
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 rounded-full border border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors"
+      >
+        <Palette size={18} />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+          {themeNames.map(name => (
+            <button
+              key={name}
+              onClick={() => {
+                setTheme(name);
+                setIsOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2 text-sm font-mono hover:bg-[var(--accent-primary)]/10 capitalize ${
+                currentTheme === name ? 'text-[var(--accent-primary)] font-bold' : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
         </div>
+      )}
+    </div>
+  );
+};
+
+// Landing Page
+const LandingPage = ({ setActiveTab }) => (
+  <div className="view-enter max-w-6xl mx-auto px-4 py-12 space-y-16">
+    {/* Hero */}
+    <div className="text-center">
+      <h1 className="text-7xl font-black text-[var(--text-primary)] mb-4 tracking-tighter">
+        100<span className="text-[var(--accent-primary)]">SENTS</span>
+      </h1>
+      <p className="text-2xl text-[var(--text-secondary)] font-mono mb-6">
+        THE FUTURE OF FINANCIAL PRIVACY
+      </p>
+      <p className="text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">
+        A privacy‑centric stable unit aggregator and scarcity engine on PulseChain. 
+        Escape the centralized control system.
+      </p>
+      <div className="flex gap-4 justify-center mt-8">
+        <button onClick={() => setActiveTab('mint')} className="px-6 py-3 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-colors rounded">
+          MINT 100
+        </button>
+        <button onClick={() => setActiveTab('forge')} className="px-6 py-3 border border-[var(--accent-primary)] text-[var(--accent-primary)] font-mono hover:bg-[var(--accent-primary)]/10 rounded">
+          FORGE SENTS
+        </button>
       </div>
-      <div className="holo-card p-6 bg-black/50">
-        <h2 className="text-xl font-mono text-white mb-4">⚡ QUICK FACTS</h2>
-        <ul className="space-y-3 text-sm text-gray-300">
-          <li>• <span className="text-[var(--neon-yellow)]">The 100</span>: Max supply 200 tokens (100 public mint + 100 emissions)</li>
-          <li>• <span className="text-[var(--neon-yellow)]">SENTS</span>: 1 SENT = $0.01, backed 1:1 by stables</li>
+    </div>
+
+    {/* Quick Facts */}
+    <div className="holo-card p-8 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">⚡ QUICK FACTS</h2>
+      <div className="grid md:grid-cols-2 gap-6">
+        <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
+          <li>• <span className="text-[var(--accent-primary)]">The 100</span>: Max supply 200 tokens (100 public mint + 100 emissions)</li>
+          <li>• <span className="text-[var(--accent-primary)]">SENTS</span>: 1 SENT = $0.01, backed 1:1 by stables</li>
           <li>• 1% fee on all forges – 50% to stakers</li>
+        </ul>
+        <ul className="space-y-3 text-sm text-[var(--text-secondary)]">
           <li>• LP stakers earn 10 additional 100 tokens per month (for 10 months)</li>
           <li>• Phase 4: Backing by a universal constant – first in DeFi</li>
           <li>• zk‑integrated privacy by default</li>
@@ -313,25 +530,62 @@ const LandingPage = ({ setActiveTab }) => (
       </div>
     </div>
 
-    <div className="grid md:grid-cols-3 gap-6 mb-16">
-      {PROJECT_DETAILS.phases.map(phase => (
-        <div key={phase.id} className="holo-card p-4 bg-black/50">
-          <div className="text-2xl font-black text-gray-700 font-mono">0{phase.id}</div>
-          <h3 className="text-lg font-bold text-[var(--neon-yellow)] mb-2">{phase.title}</h3>
-          <p className="text-xs text-gray-400">{phase.desc}</p>
-        </div>
-      ))}
+    {/* Detailed Explainer Sections */}
+    <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🌌 OVERVIEW</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.overview}</p>
+      </div>
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔮 VISION</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.vision}</p>
+      </div>
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">📈 ARBITRAGE</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.arbitrage}</p>
+      </div>
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">💸 FEE DISTRIBUTION</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.fees}</p>
+      </div>
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔒 BACKING</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.backing}</p>
+      </div>
+      <div className="holo-card p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">📉 EMISSION & DEFLATION</h3>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.emission}</p>
+      </div>
     </div>
 
-    <div className="holo-card p-8 bg-black/50 text-center max-w-3xl mx-auto">
-      <h2 className="text-2xl font-mono text-white mb-4">🔮 THE CONSTANT – A WORLD FIRST</h2>
-      <p className="text-gray-300 mb-4">
-        In Phase 4, SENTS will become the first stablecoin backed by a <span className="text-[var(--neon-yellow)]">universal constant</span> – 
+    {/* Explainer Video */}
+    <div className="holo-card p-8 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
+      <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
+        <iframe
+          className="w-full h-full"
+          src="https://www.youtube.com/embed/dQw4w9WgXcQ" // Replace with your actual video
+          title="Explainer Video"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        ></iframe>
+      </div>
+      <p className="text-sm text-[var(--text-secondary)] mt-4 text-center">
+        Mint 100 → Single Stake → Earn SENTS → LP 100 + SENTS → Stake LP → Earn More SENTS + 100 Inflation
+      </p>
+    </div>
+
+    {/* The Constant */}
+    <div className="holo-card p-8 text-center max-w-3xl mx-auto">
+      <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-4">🔮 THE CONSTANT – A WORLD FIRST</h2>
+      <p className="text-[var(--text-secondary)] mb-4">
+        In Phase 4, SENTS will become the first stablecoin backed by a <span className="text-[var(--accent-primary)]">universal constant</span> – 
         a breakthrough that eliminates any reliance on fiat or oracles. This constant is derived from 
         fundamental physics and mathematics, making it truly unstoppable and independent of any government 
         or institution. Combined with zk‑proofs, every transaction becomes private and trustless.
       </p>
-      <p className="text-sm text-gray-500 italic">
+      <p className="text-sm text-[var(--text-secondary)] italic">
         After the minting phases complete, "The 100" enters a deflationary era via buy‑and‑burn. 
         How high can it go? The market will decide.
       </p>
@@ -410,93 +664,106 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   const displayCost = rate ? (parseFloat(amount) * 1000).toLocaleString() : '...';
 
   return (
-    <div className="view-enter max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start px-4">
-      <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
-
-      <div className="space-y-6">
-        <h1 className="text-6xl font-black text-white leading-none tracking-tighter">
-          MINT 100.<br />
-          <span className="text-[var(--neon-yellow)]">BUILD SENTS.</span>
-        </h1>
-
-        <div className="holo-card p-6 border-l-4 border-[var(--neon-yellow)]">
-          <h3 className="text-lg font-bold text-[var(--neon-yellow)] font-mono mb-2 flex items-center gap-2">
-            <AlertTriangle size={16} /> MINTING PHASE ACTIVE
-          </h3>
-          <p className="text-sm text-gray-400 mb-2">
-            Cost is hard‑pegged at <strong>$1,000 Equivalent</strong> in approved stablecoins.
-          </p>
-          <p className="text-xs text-gray-500 italic">
-            Arbitrage Opportunity: If market price > $1,000, mint here and sell on PulseX to stabilise the peg.
-          </p>
-        </div>
-
-        <div className="holo-card p-6 bg-black/50">
-          <h4 className="text-md font-bold text-white mb-3 font-mono flex items-center gap-2">
-            <Hexagon size={16} className="text-[var(--neon-yellow)]" /> Why hold <span className="text-[var(--neon-yellow)]">The 100</span>?
-          </h4>
-          <ul className="text-sm text-gray-300 space-y-2 list-disc pl-5 font-mono">
-            <li>Governance rights over the protocol.</li>
-            <li>Earn 25% of all protocol fees via single staking.</li>
-            <li>LP stakers earn an additional 120‑token emission (10 per month).</li>
-            <li>Hyper‑scarce supply – only 200 will ever exist.</li>
-          </ul>
-          <p className="text-xs text-gray-500 mt-3 italic">
-            When liquidity pools launch, price will float. Mint at $1,000 cost and sell above peg to capture arbitrage.
-          </p>
-        </div>
-
-        {/* Chart now shows the live The 100/DAI pool */}
-        <DexChart pairAddress={DAI_100_PAIR} />
-      </div>
-
-      <div className="holo-card p-8 bg-black/80">
+    <div className="view-enter max-w-6xl mx-auto px-4 py-8">
+      <div className="grid lg:grid-cols-2 gap-12 items-start">
         <div className="space-y-6">
-          <div>
-            <label className="text-xs text-gray-500 font-mono block mb-2">QUANTITY</label>
-            <div className="flex items-center bg-[#111] border border-white/10 p-2">
-              <button onClick={() => setAmount(Math.max(0.1, parseFloat((amount-0.1).toFixed(1))))} className="p-2 hover:text-white"><Minus size={16}/></button>
-              <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 bg-transparent text-center font-mono text-2xl outline-none" step="0.1" min="0.1" />
-              <button onClick={() => setAmount(parseFloat((amount+0.1).toFixed(1)))} className="p-2 hover:text-white"><Plus size={16}/></button>
-            </div>
-            <div className="flex justify-between mt-2 text-xs">
-              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(4)} {selectedToken.symbol}</span>
-              <div className="flex gap-2">
-                <button onClick={() => setAmount(parseFloat((userBalance * 0.25 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
-                <button onClick={() => setAmount(parseFloat((userBalance * 0.5 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
-                <button onClick={() => setAmount(parseFloat((userBalance * 0.75 / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
-                <button onClick={() => setAmount(parseFloat((userBalance / 1000).toFixed(1)))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
+          <h1 className="text-6xl font-black text-[var(--text-primary)] leading-none tracking-tighter">
+            MINT 100.<br />
+            <span className="text-[var(--accent-primary)]">BUILD SENTS.</span>
+          </h1>
+
+          <div className="holo-card p-6 border-l-4 border-[var(--accent-primary)]">
+            <h3 className="text-lg font-bold text-[var(--accent-primary)] font-mono mb-2 flex items-center gap-2">
+              <AlertTriangle size={16} /> MINTING PHASE ACTIVE
+            </h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-2">
+              Cost is hard‑pegged at <strong>$1,000 Equivalent</strong> in approved stablecoins.
+            </p>
+            <p className="text-xs text-[var(--text-secondary)] italic">
+              Arbitrage Opportunity: If market price > $1,000, mint here and sell on PulseX to stabilise the peg.
+            </p>
+          </div>
+
+          <div className="holo-card p-6">
+            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2">
+              <Hexagon size={16} className="text-[var(--accent-primary)]" /> Why hold <span className="text-[var(--accent-primary)]">The 100</span>?
+            </h4>
+            <ul className="text-sm text-[var(--text-secondary)] space-y-2 list-disc pl-5 font-mono">
+              <li>Governance rights over the protocol.</li>
+              <li>Earn 25% of all protocol fees via single staking.</li>
+              <li>LP stakers earn an additional 100‑token emission (10 per month).</li>
+              <li>Hyper‑scarce supply – only 200 will ever exist.</li>
+            </ul>
+          </div>
+
+          <div className="holo-card p-6">
+            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2">
+              <TrendingUp size={16} className="text-[var(--accent-primary)]" /> Arbitrage Mechanics
+            </h4>
+            <p className="text-sm text-[var(--text-secondary)] mb-2">
+              When liquidity pools launch, "The 100" will trade freely on PulseX. 
+              If the market price rises above the $1,000 minting cost, arbitrageurs can mint new "The 100" 
+              here and sell them on the DEX for a profit, simultaneously stabilising the price.
+            </p>
+            <p className="text-sm text-[var(--text-secondary)]">
+              This creates a natural price floor and ceiling, ensuring "The 100" remains closely pegged to its fundamental value.
+            </p>
+          </div>
+
+          <DexChart pairAddress={DAI_100_PAIR} />
+        </div>
+
+        <div className="holo-card p-8 bg-[var(--bg-secondary)]">
+          <div className="space-y-6">
+            <div>
+              <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">QUANTITY</label>
+              <div className="flex items-center bg-[var(--bg-primary)] border border-[var(--border)] p-2 rounded">
+                <button onClick={() => setAmount(Math.max(0.1, parseFloat((amount-0.1).toFixed(1))))} className="p-2 hover:text-[var(--accent-primary)]"><Minus size={16}/></button>
+                <input type="number" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 bg-transparent text-center font-mono text-2xl outline-none text-[var(--text-primary)]" step="0.1" min="0.1" />
+                <button onClick={() => setAmount(parseFloat((amount+0.1).toFixed(1)))} className="p-2 hover:text-[var(--accent-primary)]"><Plus size={16}/></button>
+              </div>
+              <div className="flex justify-between mt-2 text-xs">
+                <span className="text-[var(--text-secondary)]">Balance: {parseFloat(userBalance).toFixed(4)} {selectedToken.symbol}</span>
+                <div className="flex gap-2">
+                  <button onClick={() => setAmount(parseFloat((userBalance * 0.25 / 1000).toFixed(1)))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">25%</button>
+                  <button onClick={() => setAmount(parseFloat((userBalance * 0.5 / 1000).toFixed(1)))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">50%</button>
+                  <button onClick={() => setAmount(parseFloat((userBalance * 0.75 / 1000).toFixed(1)))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">75%</button>
+                  <button onClick={() => setAmount(parseFloat((userBalance / 1000).toFixed(1)))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">MAX</button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <label className="text-xs text-gray-500 font-mono block mb-2">PAYMENT ASSET (STABLECOINS)</label>
-            <select
-              className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
-              onChange={(e) => setSelectedToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
+            <div>
+              <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">PAYMENT ASSET (STABLECOINS)</label>
+              <div className="flex items-center gap-2">
+                <select
+                  className="flex-1 bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"
+                  onChange={(e) => setSelectedToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
+                >
+                  {MINT_TOKENS.map((t) => (
+                    <option key={t.symbol} value={t.symbol}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+                <CopyableAddress address={selectedToken.addr} symbol={selectedToken.symbol} />
+              </div>
+            </div>
+
+            <div className="flex justify-between bg-[var(--bg-primary)] p-4 rounded">
+              <span className="text-[var(--text-secondary)] text-xs font-mono">TOTAL COST</span>
+              <span className="text-[var(--text-primary)] font-mono text-xl">
+                {displayCost} {selectedToken.symbol}
+              </span>
+            </div>
+
+            <button
+              onClick={handleMint}
+              className="w-full py-4 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-opacity uppercase tracking-widest rounded"
             >
-              {MINT_TOKENS.map((t) => (
-                <option key={t.symbol} value={t.symbol}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
+              {wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}
+            </button>
           </div>
-
-          <div className="flex justify-between bg-white/5 p-4 rounded">
-            <span className="text-gray-400 text-xs font-mono">TOTAL COST</span>
-            <span className="text-white font-mono text-xl">
-              {displayCost} {selectedToken.symbol}
-            </span>
-          </div>
-
-          <button
-            onClick={handleMint}
-            className="w-full py-4 bg-[var(--neon-yellow)] text-black font-bold font-mono hover:bg-[var(--neon-orange)] transition-colors uppercase tracking-widest"
-          >
-            {wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}
-          </button>
         </div>
       </div>
     </div>
@@ -590,128 +857,154 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
     : '0';
 
   return (
-    <div className="view-enter max-w-4xl mx-auto px-4">
+    <div className="view-enter max-w-4xl mx-auto px-4 py-8">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
 
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
-          <Box className="text-[var(--neon-yellow)]" /> SENTS FORGE
+        <h2 className="text-3xl font-bold text-[var(--text-primary)] flex items-center justify-center gap-3">
+          <Box className="text-[var(--accent-primary)]" /> SENTS FORGE
         </h2>
-        <p className="text-gray-500 font-mono text-sm mt-2">1 SENTS = $0.01 USD. 1% Protocol Fee applies.</p>
+        <p className="text-[var(--text-secondary)] font-mono text-sm mt-2">1 SENTS = $0.01 USD. 1% Protocol Fee applies.</p>
       </div>
 
-      <div className="holo-card p-8">
-        <div className="flex mb-8 bg-[#111] p-1 rounded-lg border border-white/10">
-          <button
-            onClick={() => setMode('forge')}
-            className={`flex-1 py-2 font-mono text-sm ${
-              mode === 'forge' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'
-            }`}
-          >
-            FORGE
-          </button>
-          <button
-            onClick={() => setMode('unforge')}
-            className={`flex-1 py-2 font-mono text-sm ${
-              mode === 'unforge' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'
-            }`}
-          >
-            UNFORGE
-          </button>
+      <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="lg:col-span-2">
+          <div className="holo-card p-8">
+            <div className="flex mb-8 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border)]">
+              <button
+                onClick={() => setMode('forge')}
+                className={`flex-1 py-2 font-mono text-sm rounded ${
+                  mode === 'forge' ? 'bg-[var(--accent-primary)] text-black font-bold' : 'text-[var(--text-secondary)]'
+                }`}
+              >
+                FORGE
+              </button>
+              <button
+                onClick={() => setMode('unforge')}
+                className={`flex-1 py-2 font-mono text-sm rounded ${
+                  mode === 'unforge' ? 'bg-[var(--accent-secondary)] text-black font-bold' : 'text-[var(--text-secondary)]'
+                }`}
+              >
+                UNFORGE
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-[var(--bg-primary)] p-4 border border-[var(--border)] rounded-lg">
+                <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">INPUT</label>
+                <div className="flex gap-4">
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="bg-transparent text-3xl font-mono text-[var(--text-primary)] outline-none w-full"
+                  />
+                  {mode === 'forge' ? (
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] px-3 font-mono rounded"
+                        onChange={(e) => setToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
+                      >
+                        {MINT_TOKENS.map((t) => (
+                          <option key={t.symbol} value={t.symbol}>
+                            {t.symbol}
+                          </option>
+                        ))}
+                      </select>
+                      <CopyableAddress address={token.addr} symbol={token.symbol} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[var(--accent-primary)] font-bold font-mono">SENTS</span>
+                      <CopyableAddress address={SENTS_ADDRESS} symbol="SENTS" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between mt-2 text-xs">
+                  <span className="text-[var(--text-secondary)]">Balance: {parseFloat(userBalance).toFixed(6)} {mode === 'forge' ? token.symbol : 'SENTS'}</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => setAmount((userBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">25%</button>
+                    <button onClick={() => setAmount((userBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">50%</button>
+                    <button onClick={() => setAmount((userBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">75%</button>
+                    <button onClick={() => setAmount(userBalance)} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">MAX</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <ArrowDown className={mode === 'forge' ? 'text-[var(--accent-primary)]' : 'text-[var(--accent-secondary)]'} />
+              </div>
+
+              <div className="bg-[var(--bg-primary)] p-4 border border-[var(--border)] rounded-lg">
+                <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">OUTPUT</label>
+                <div className="flex gap-4 items-center">
+                  <div className="text-3xl font-mono text-[var(--text-primary)] w-full">{outputAmount}</div>
+                  {mode === 'forge' ? (
+                    <span className="text-[var(--accent-primary)] font-bold font-mono">SENTS</span>
+                  ) : (
+                    <span className="text-[var(--text-primary)] font-mono">{token.symbol}</span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">RECIPIENT (optional, for privacy)</label>
+                <input
+                  type="text"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  placeholder="Leave empty to send to yourself"
+                  className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"
+                />
+              </div>
+
+              <div className="text-xs text-[var(--text-secondary)] font-mono space-y-1 border-t border-[var(--border)] pt-4">
+                <div className="flex justify-between">
+                  <span>Fee (1%)</span>
+                  <span>{(amount * 0.01).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-[var(--accent-primary)]">
+                  <span>Distribution:</span>
+                  <span>50% Stakers / 30% Reserve / 20% Operations</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handleForge}
+                className={`w-full py-4 font-bold font-mono transition-colors uppercase rounded ${
+                  mode === 'forge'
+                    ? 'bg-[var(--accent-primary)] text-black hover:opacity-90'
+                    : 'bg-[var(--accent-secondary)] text-black hover:opacity-90'
+                }`}
+              >
+                {mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
-            <label className="text-xs text-gray-500 font-mono block mb-2">INPUT</label>
-            <div className="flex gap-4">
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="bg-transparent text-3xl font-mono text-white outline-none w-full"
-              />
-              {mode === 'forge' ? (
-                <select
-                  className="bg-black border border-white/20 text-white px-3 font-mono"
-                  onChange={(e) => setToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
-                >
-                  {MINT_TOKENS.map((t) => (
-                    <option key={t.symbol} value={t.symbol}>
-                      {t.symbol}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <span className="text-[var(--neon-yellow)] font-bold font-mono pt-2">SENTS</span>
-              )}
-            </div>
-            <div className="flex justify-between mt-2 text-xs">
-              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(6)} {mode === 'forge' ? token.symbol : 'SENTS'}</span>
-              <div className="flex gap-2">
-                <button onClick={() => setAmount((userBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
-                <button onClick={() => setAmount((userBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
-                <button onClick={() => setAmount((userBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
-                <button onClick={() => setAmount(userBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
-              </div>
+        <div className="space-y-4">
+          <div className="holo-card p-6">
+            <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">💸 FEE DISTRIBUTION</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">{PROJECT_DETAILS.fees}</p>
+            <div className="text-xs space-y-2">
+              <div className="flex justify-between"><span>Stakers</span><span className="text-[var(--accent-primary)]">50%</span></div>
+              <div className="flex justify-between"><span>Reserve</span><span className="text-[var(--accent-primary)]">30%</span></div>
+              <div className="flex justify-between"><span>Operations</span><span className="text-[var(--accent-primary)]">20%</span></div>
             </div>
           </div>
-
-          <div className="flex justify-center">
-            <ArrowDown className={mode === 'forge' ? 'text-[var(--neon-yellow)]' : 'text-[var(--neon-orange)]'} />
+          <div className="holo-card p-6">
+            <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔒 BACKING</h3>
+            <p className="text-sm text-[var(--text-secondary)]">{PROJECT_DETAILS.backing}</p>
           </div>
-
-          <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
-            <label className="text-xs text-gray-500 font-mono block mb-2">OUTPUT</label>
-            <div className="flex gap-4 items-center">
-              <div className="text-3xl font-mono text-white w-full">{outputAmount}</div>
-              {mode === 'forge' ? (
-                <span className="text-[var(--neon-yellow)] font-bold font-mono">SENTS</span>
-              ) : (
-                <span className="text-white font-mono">{token.symbol}</span>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500 font-mono block mb-2">RECIPIENT (optional, for privacy)</label>
-            <input
-              type="text"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="Leave empty to send to yourself"
-              className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
-            />
-          </div>
-
-          <div className="text-xs text-gray-500 font-mono space-y-1 border-t border-white/10 pt-4">
-            <div className="flex justify-between">
-              <span>Fee (1%)</span>
-              <span>{(amount * 0.01).toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-[var(--neon-yellow)]">
-              <span>Distribution:</span>
-              <span>50% Stakers / 30% Reserve / 20% Operations</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleForge}
-            className={`w-full py-4 font-bold font-mono transition-colors uppercase ${
-              mode === 'forge'
-                ? 'bg-[var(--neon-yellow)] text-black hover:bg-[var(--neon-orange)]'
-                : 'bg-[var(--neon-orange)] text-black hover:bg-[var(--neon-yellow)]'
-            }`}
-          >
-            {mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// Yield View – Enhanced with debugging info for single stake
+// Yield View
 const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [stakeType, setStakeType] = useState('single');
   const [amount, setAmount] = useState('');
@@ -753,19 +1046,13 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
         const bal = await tokenContract.balanceOf(wallet);
         setStakeBalance(ethers.utils.formatUnits(bal, 18));
 
-        // Also fetch allowance for single stake
         if (stakeType === 'single') {
           const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
           setAllowance(ethers.utils.formatUnits(allowanceWei, 18));
-        }
-
-        // Fetch manager's balance of 100 tokens (for unstaking)
-        if (stakeType === 'single') {
           const managerBal = await tokenContract.balanceOf(MANAGER_ADDRESS);
           setManagerBalance(ethers.utils.formatUnits(managerBal, 18));
         }
       } catch (e) {
-        console.error(e);
         setStakeBalance('0');
       }
     };
@@ -842,7 +1129,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
       const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
       const stakeWei = ethers.utils.parseUnits(amount, 18);
 
-      // Check allowance
       const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
       if (allowanceWei.lt(stakeWei)) {
         setTxState(s => ({ ...s, status: 'pending', step: 'Approving...' }));
@@ -953,16 +1239,16 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
   };
 
   return (
-    <div className="view-enter max-w-6xl mx-auto px-4">
+    <div className="view-enter max-w-6xl mx-auto px-4 py-8">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
 
-      <h2 className="text-4xl font-bold text-white text-center mb-8">YIELD NEXUS</h2>
+      <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-8">YIELD NEXUS</h2>
 
-      <div className="flex justify-center mb-8 bg-[#111] p-1 rounded-lg border border-white/10 w-fit mx-auto">
+      <div className="flex justify-center mb-8 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border)] w-fit mx-auto">
         <button
           onClick={() => setStakeType('single')}
-          className={`px-6 py-2 font-mono text-sm ${
-            stakeType === 'single' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'
+          className={`px-6 py-2 font-mono text-sm rounded ${
+            stakeType === 'single' ? 'bg-[var(--accent-primary)] text-black font-bold' : 'text-[var(--text-secondary)]'
           }`}
         >
           SINGLE STAKE (100)
@@ -970,145 +1256,139 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
         <button
           onClick={() => setStakeType('lp')}
           disabled={!lpTokenSet}
-          className={`px-6 py-2 font-mono text-sm ${
-            stakeType === 'lp' ? 'bg-[var(--neon-orange)] text-black font-bold' : 
-            !lpTokenSet ? 'text-gray-600 cursor-not-allowed' : 'text-gray-500'
+          className={`px-6 py-2 font-mono text-sm rounded ${
+            stakeType === 'lp' ? 'bg-[var(--accent-secondary)] text-black font-bold' : 
+            !lpTokenSet ? 'text-gray-600 cursor-not-allowed' : 'text-[var(--text-secondary)]'
           }`}
         >
           LP STAKE (100/SENTS) {!lpTokenSet && '(coming soon)'}
         </button>
       </div>
 
-      {/* Debug Info for Single Stake */}
       {stakeType === 'single' && (
-        <div className="grid grid-cols-3 gap-4 mb-4 text-xs font-mono">
-          <div className="holo-card p-2 bg-black/30">
-            <span className="text-gray-500">Your 100 Balance:</span>
-            <span className="text-white ml-2">{parseFloat(stakeBalance).toFixed(4)}</span>
+        <div className="grid grid-cols-3 gap-4 mb-4 text-xs font-mono max-w-2xl mx-auto">
+          <div className="holo-card p-2 bg-[var(--bg-primary)]">
+            <span className="text-[var(--text-secondary)]">Your 100 Balance:</span>
+            <span className="text-[var(--text-primary)] ml-2">{parseFloat(stakeBalance).toFixed(4)}</span>
           </div>
-          <div className="holo-card p-2 bg-black/30">
-            <span className="text-gray-500">Allowance:</span>
-            <span className="text-white ml-2">{parseFloat(allowance).toFixed(4)}</span>
+          <div className="holo-card p-2 bg-[var(--bg-primary)]">
+            <span className="text-[var(--text-secondary)]">Allowance:</span>
+            <span className="text-[var(--text-primary)] ml-2">{parseFloat(allowance).toFixed(4)}</span>
           </div>
-          <div className="holo-card p-2 bg-black/30">
-            <span className="text-gray-500">Manager 100 Balance:</span>
-            <span className="text-white ml-2">{parseFloat(managerBalance).toFixed(4)}</span>
+          <div className="holo-card p-2 bg-[var(--bg-primary)]">
+            <span className="text-[var(--text-secondary)]">Manager 100 Balance:</span>
+            <span className="text-[var(--text-primary)] ml-2">{parseFloat(managerBalance).toFixed(4)}</span>
           </div>
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="holo-card p-6 bg-black/50">
-          <h3 className="text-lg font-mono text-white mb-4">YOUR POSITION</h3>
+      <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
+        <div className="holo-card p-6">
+          <h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">YOUR POSITION</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-gray-400 text-sm">Staked</span>
-              <span className="text-white font-mono">{formatFull(userStake, 18)}</span>
+              <span className="text-[var(--text-secondary)] text-sm">Staked</span>
+              <span className="text-[var(--text-primary)] font-mono">{formatFull(userStake, 18)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400 text-sm">Total Pool</span>
-              <span className="text-white font-mono">{formatFull(totalStake, 18)}</span>
+              <span className="text-[var(--text-secondary)] text-sm">Total Pool</span>
+              <span className="text-[var(--text-primary)] font-mono">{formatFull(totalStake, 18)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400 text-sm">Your Share</span>
-              <span className="text-[var(--neon-yellow)] font-mono">{userShare.toFixed(4)}%</span>
+              <span className="text-[var(--text-secondary)] text-sm">Your Share</span>
+              <span className="text-[var(--accent-primary)] font-mono">{userShare.toFixed(4)}%</span>
             </div>
           </div>
         </div>
 
-        <div className="holo-card p-6 bg-black/50">
-          <h3 className="text-lg font-mono text-white mb-4">PENDING REWARDS</h3>
+        <div className="holo-card p-6">
+          <h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">PENDING REWARDS</h3>
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {stablecoins.map((addr) => {
-              const symbol = MINT_TOKENS.find((t) => t.addr.toLowerCase() === addr.toLowerCase())?.symbol || addr.slice(0, 6);
+              const tokenInfo = MINT_TOKENS.find(t => t.addr.toLowerCase() === addr.toLowerCase());
+              const symbol = tokenInfo?.symbol || addr.slice(0, 6);
               return (
-                <div key={addr} className="flex justify-between text-sm">
-                  <span className="text-gray-400">{symbol}</span>
-                  <span className="text-white font-mono">{formatFull(pendingFees[addr] || '0', decimalsMap[addr] || 18)}</span>
+                <div key={addr} className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[var(--text-secondary)]">{symbol}</span>
+                    {tokenInfo && <CopyableAddress address={addr} symbol={symbol} showSymbol={false} />}
+                  </div>
+                  <span className="text-[var(--text-primary)] font-mono">{formatFull(pendingFees[addr] || '0', decimalsMap[addr] || 18)}</span>
                 </div>
               );
             })}
             {stakeType === 'lp' && (
-              <div className="flex justify-between text-sm">
-                <span className="text-[var(--neon-yellow)]">100 EMISSION</span>
-                <span className="text-white font-mono">{formatFull(pendingLp, 18)}</span>
+              <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center gap-1">
+                  <span className="text-[var(--accent-primary)]">100 EMISSION</span>
+                  <CopyableAddress address={TOKEN_100_ADDRESS} symbol="100" showSymbol={false} />
+                </div>
+                <span className="text-[var(--text-primary)] font-mono">{formatFull(pendingLp, 18)}</span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="holo-card p-6 bg-black/50">
-          <h3 className="text-lg font-mono text-white mb-4">PROJECTED REWARDS</h3>
+        <div className="holo-card p-6">
+          <h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">PROJECTED REWARDS</h3>
           {userShare > 0 && (
             <div className="space-y-2 text-sm">
-              <p className="text-gray-500 italic">Based on current pool share</p>
+              <p className="text-[var(--text-secondary)] italic">Based on current pool share</p>
               <div className="flex justify-between">
-                <span className="text-gray-400">Est. daily fees</span>
-                <span className="text-white font-mono">--</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Est. weekly fees</span>
-                <span className="text-white font-mono">--</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Est. monthly fees</span>
-                <span className="text-white font-mono">--</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Est. yearly fees</span>
-                <span className="text-white font-mono">--</span>
+                <span className="text-[var(--text-secondary)]">Est. yearly fees</span>
+                <span className="text-[var(--text-primary)] font-mono">--</span>
               </div>
               {stakeType === 'lp' && (
                 <div className="flex justify-between">
-                  <span className="text-gray-400">100/year</span>
-                  <span className="text-white font-mono">{(userShare / 100 * 120).toFixed(4)}</span>
+                  <span className="text-[var(--text-secondary)]">100/year</span>
+                  <span className="text-[var(--text-primary)] font-mono">{(userShare / 100 * 100).toFixed(4)}</span>
                 </div>
               )}
             </div>
           )}
           {userShare === 0 && (
-            <p className="text-gray-500 italic text-xs">Stake to see projections.</p>
+            <p className="text-[var(--text-secondary)] italic text-xs">Stake to see projections.</p>
           )}
-          <p className="text-xs text-gray-600 mt-3 border-t border-white/10 pt-2">
+          <p className="text-xs text-[var(--text-secondary)] mt-3 border-t border-[var(--border)] pt-2">
             * APY estimates coming soon with indexer.
           </p>
         </div>
       </div>
 
-      <div className="holo-card p-8 bg-black/50 max-w-2xl mx-auto">
-        <h3 className="text-xl font-mono mb-4" style={{ color: stakeType === 'single' ? 'var(--neon-yellow)' : 'var(--neon-orange)' }}>
+      <div className="holo-card p-8 max-w-2xl mx-auto">
+        <h3 className="text-xl font-mono mb-4" style={{ color: stakeType === 'single' ? 'var(--accent-primary)' : 'var(--accent-secondary)' }}>
           {stakeType === 'single' ? 'SINGLE STAKE' : 'LP STAKE'}
         </h3>
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-gray-500 font-mono block mb-2">AMOUNT</label>
+            <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">AMOUNT</label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.0"
-              className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
+              className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"
             />
             <div className="flex justify-between mt-2 text-xs">
-              <span className="text-gray-500">Balance: {parseFloat(stakeBalance).toFixed(6)} {stakeType === 'single' ? '100' : 'LP'}</span>
+              <span className="text-[var(--text-secondary)]">Balance: {parseFloat(stakeBalance).toFixed(6)} {stakeType === 'single' ? '100' : 'LP'}</span>
               <div className="flex gap-2">
-                <button onClick={() => setAmount((stakeBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
-                <button onClick={() => setAmount((stakeBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
-                <button onClick={() => setAmount((stakeBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
-                <button onClick={() => setAmount(stakeBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
+                <button onClick={() => setAmount((stakeBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">25%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">50%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">75%</button>
+                <button onClick={() => setAmount(stakeBalance)} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">MAX</button>
               </div>
             </div>
           </div>
           <div className="flex gap-4">
             <button
               onClick={handleStake}
-              className="flex-1 py-3 border border-[var(--neon-yellow)] text-[var(--neon-yellow)] hover:bg-[var(--neon-yellow)] hover:text-black font-bold font-mono uppercase"
+              className="flex-1 py-3 border border-[var(--accent-primary)] text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black font-bold font-mono uppercase rounded"
             >
               STAKE
             </button>
             <button
               onClick={handleUnstake}
-              className="flex-1 py-3 border border-[var(--neon-orange)] text-[var(--neon-orange)] hover:bg-[var(--neon-orange)] hover:text-black font-bold font-mono uppercase"
+              className="flex-1 py-3 border border-[var(--accent-secondary)] text-[var(--accent-secondary)] hover:bg-[var(--accent-secondary)] hover:text-black font-bold font-mono uppercase rounded"
             >
               UNSTAKE
             </button>
@@ -1116,14 +1396,14 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
           <div className="flex gap-4 pt-4">
             <button
               onClick={handleClaimFees}
-              className="flex-1 py-3 bg-[var(--neon-yellow)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-orange)]"
+              className="flex-1 py-3 bg-[var(--accent-primary)] text-black font-bold font-mono uppercase hover:opacity-90 rounded"
             >
               CLAIM FEES
             </button>
             {stakeType === 'lp' && lpTokenSet && (
               <button
                 onClick={handleClaimLp}
-                className="flex-1 py-3 bg-[var(--neon-orange)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-yellow)]"
+                className="flex-1 py-3 bg-[var(--accent-secondary)] text-black font-bold font-mono uppercase hover:opacity-90 rounded"
               >
                 CLAIM LP
               </button>
@@ -1136,33 +1416,81 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
 };
 
 // Wallet View
-const WalletView = ({ wallet, balances }) => (
-  <div className="view-enter max-w-4xl mx-auto px-4">
-     <div className="holo-card p-6 mb-6">
-        <div className="text-xs text-gray-500 font-mono mb-1">CONNECTED ADDRESS</div>
-        <div className="text-lg text-[var(--neon-yellow)] font-mono break-all">{wallet || 'Not Connected'}</div>
-     </div>
-     <div className="grid gap-3 max-h-96 overflow-y-auto">
-        {balances.map((b, i) => (
-           <div key={i} className="bg-[#111] border border-white/5 p-4 rounded flex justify-between items-center hover:border-white/20 transition-colors">
-              <span className="text-white font-bold">{b.symbol}</span>
-              <span className="text-gray-400 font-mono">{b.bal}</span>
-           </div>
-        ))}
-     </div>
-  </div>
-);
+const WalletView = ({ wallet, balances, transactions, connect, onBuy, onSell, onSwap }) => {
+  const [showSwap, setShowSwap] = useState(false);
+
+  const totalValue = balances.reduce((acc, b) => acc + (parseFloat(b.bal) * (b.symbol === '100' ? 1000 : 1)), 0); // rough estimate
+
+  return (
+    <div className="view-enter max-w-4xl mx-auto px-4 py-8">
+      {showSwap && <PiteasIframe onClose={() => setShowSwap(false)} />}
+
+      <div className="holo-card p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="text-xs text-[var(--text-secondary)] font-mono mb-1">CONNECTED ADDRESS</div>
+            <div className="text-lg text-[var(--accent-primary)] font-mono break-all">{wallet || 'Not Connected'}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-[var(--text-secondary)] font-mono">TOTAL VALUE</div>
+            <div className="text-xl font-bold text-[var(--text-primary)]">${totalValue.toFixed(2)}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 mt-4">
+          <button onClick={onBuy} className="p-3 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded-lg flex flex-col items-center gap-1">
+            <ShoppingCart size={20} className="text-[var(--accent-primary)]" />
+            <span className="text-xs font-mono">Buy</span>
+          </button>
+          <button onClick={onSell} className="p-3 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded-lg flex flex-col items-center gap-1">
+            <CreditCard size={20} className="text-[var(--accent-secondary)]" />
+            <span className="text-xs font-mono">Sell</span>
+          </button>
+          <button onClick={() => setShowSwap(true)} className="p-3 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded-lg flex flex-col items-center gap-1">
+            <SwapIcon size={20} className="text-[var(--accent-primary)]" />
+            <span className="text-xs font-mono">Swap</span>
+          </button>
+          <button className="p-3 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded-lg flex flex-col items-center gap-1">
+            <Send size={20} className="text-[var(--accent-secondary)]" />
+            <span className="text-xs font-mono">Send</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="holo-card p-6">
+          <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4">ASSETS</h3>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {balances.map((b, i) => (
+              <div key={i} className="flex justify-between items-center p-3 bg-[var(--bg-primary)] rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-[var(--text-primary)] font-bold">{b.symbol}</span>
+                  {b.addr && <CopyableAddress address={b.addr} symbol={b.symbol} showSymbol={false} />}
+                </div>
+                <span className="text-[var(--text-primary)] font-mono">{b.bal}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <RecentTransactions txs={transactions} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Trajectory View
 const TrajectoryView = () => (
-  <div className="view-enter max-w-4xl mx-auto space-y-4 pb-20">
-     <h2 className="text-4xl font-bold text-white text-center mb-12">TRAJECTORY</h2>
+  <div className="view-enter max-w-4xl mx-auto px-4 py-8 space-y-4">
+     <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-12">TRAJECTORY</h2>
      {PROJECT_DETAILS.phases.map(p => (
-        <div key={p.id} className="holo-card p-6 flex gap-4 items-center hover:bg-white/5 transition-colors">
-           <div className="text-4xl font-black text-gray-800 font-mono">0{p.id}</div>
+        <div key={p.id} className="holo-card p-6 flex gap-4 items-center hover:bg-[var(--bg-secondary)] transition-colors">
+           <div className="text-4xl font-black text-[var(--text-secondary)] font-mono">0{p.id}</div>
            <div>
-              <h3 className={`font-bold uppercase text-[var(--neon-yellow)]`}>{p.title}</h3>
-              <p className="text-sm text-gray-500 font-mono">{p.desc}</p>
+              <h3 className={`font-bold uppercase text-[var(--accent-primary)]`}>{p.title}</h3>
+              <p className="text-sm text-[var(--text-secondary)] font-mono">{p.desc}</p>
            </div>
         </div>
      ))}
@@ -1177,8 +1505,19 @@ const App = () => {
   const [wallet, setWallet] = useState(null);
   const [balances, setBalances] = useState([]);
   const [provider, setProvider] = useState(null);
-  const [rampOpen, setRampOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const [currentTheme, setCurrentTheme] = useState('dark');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Apply theme
+  useEffect(() => {
+    const theme = THEMES[currentTheme];
+    if (theme) {
+      Object.keys(theme).forEach(key => {
+        document.documentElement.style.setProperty(key, theme[key]);
+      });
+    }
+  }, [currentTheme]);
 
   // Initialize provider
   useEffect(() => {
@@ -1199,6 +1538,10 @@ const App = () => {
     if (savedTxs) {
       setTransactions(JSON.parse(savedTxs));
     }
+    const savedTheme = localStorage.getItem('100sents_theme');
+    if (savedTheme && THEMES[savedTheme]) {
+      setCurrentTheme(savedTheme);
+    }
   }, [provider]);
 
   // Save wallet and transactions when they change
@@ -1210,6 +1553,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('100sents_txs', JSON.stringify(transactions));
   }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('100sents_theme', currentTheme);
+  }, [currentTheme]);
 
   // Listen for account/chain changes
   useEffect(() => {
@@ -1237,8 +1584,8 @@ const App = () => {
     const signer = provider.getSigner();
     
     const allTokens = [
-      { symbol: '100', addr: TOKEN_100_ADDRESS, dec: 18 },
-      { symbol: 'SENTS', addr: SENTS_ADDRESS, dec: 18 },
+      { symbol: '100', name: 'The 100', addr: TOKEN_100_ADDRESS, dec: 18 },
+      { symbol: 'SENTS', name: '100SENTS Stable', addr: SENTS_ADDRESS, dec: 18 },
       ...MINT_TOKENS,
       ...LP_TOKENS,
       ...RICH_TOKENS
@@ -1250,8 +1597,8 @@ const App = () => {
          const c = new ethers.Contract(t.addr, ERC20_ABI, signer);
          const b = await c.balanceOf(wallet);
          const fmt = ethers.utils.formatUnits(b, t.decimals || 18);
-         bals.push({ symbol: t.symbol, bal: parseFloat(fmt).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}) });
-       } catch(e) { bals.push({ symbol: t.symbol, bal: '0.00' }); }
+         bals.push({ symbol: t.symbol, name: t.name, bal: parseFloat(fmt).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}), addr: t.addr });
+       } catch(e) { bals.push({ symbol: t.symbol, name: t.name, bal: '0.00', addr: t.addr }); }
     }
     setBalances(bals);
   };
@@ -1288,82 +1635,117 @@ const App = () => {
     setTransactions(prev => [tx, ...prev].slice(0, 20));
   };
 
+  const handleBuy = () => {
+    window.open(RAMP_LINKS.provex, '_blank');
+  };
+
+  const handleSell = () => {
+    window.open(RAMP_LINKS.peer, '_blank');
+  };
+
+  const navItems = [
+    { id: 'landing', label: 'HOME', icon: Home },
+    { id: 'mint', label: 'MINT 100', icon: Hourglass },
+    { id: 'forge', label: 'FORGE', icon: Box },
+    { id: 'yield', label: 'YIELD', icon: Zap },
+    { id: 'trajectory', label: 'TRAJECTORY', icon: Map },
+    { id: 'wallet', label: 'WALLET', icon: Wallet }
+  ];
+
   return (
-    <div className="min-h-screen bg-[#050505] text-gray-200 font-sans selection:bg-[var(--neon-yellow)]/30 overflow-x-hidden">
-      <style>{STYLES}</style>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-primary)]/30 overflow-x-hidden">
+      <style>{baseStyles}</style>
       <div className="sci-fi-grid"></div>
       
       <div className="relative z-10 p-6">
-        <header className="flex flex-col lg:flex-row justify-between items-center mb-12 relative z-50 gap-4 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('landing')}>
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-yellow)] to-[var(--neon-orange)] rounded flex items-center justify-center text-black font-bold text-xl shadow-lg shadow-[var(--neon-yellow)]/50">¢</div>
-            <span className="text-2xl font-bold tracking-widest text-white font-mono group-hover:text-[var(--neon-yellow)] transition-colors">100SENTS</span>
+        <header className="flex justify-between items-center mb-8 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('landing')}>
+            <div className="w-10 h-10 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded flex items-center justify-center text-black font-bold text-xl">¢</div>
+            <span className="text-2xl font-bold tracking-widest text-[var(--text-primary)] font-mono">100SENTS</span>
           </div>
-          
-          <nav className="flex items-center gap-1 bg-[#111] p-1.5 rounded-full border border-white/10 backdrop-blur-md">
-            {[
-              { id: 'landing', label: 'HOME', icon: Home },
-              { id: 'mint', label: 'MINT 100', icon: Hourglass },
-              { id: 'forge', label: 'FORGE', icon: Box }, 
-              { id: 'yield', label: 'YIELD', icon: Zap },
-              { id: 'trajectory', label: 'TRAJECTORY', icon: Map },
-              { id: 'swap', label: 'SWAP', icon: Repeat }
-            ].map((tab) => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-2 rounded-full text-[10px] font-bold font-mono uppercase transition-all ${activeTab === tab.id ? 'bg-[var(--neon-yellow)] text-black' : 'text-gray-500 hover:text-white'}`}>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-2 bg-[var(--bg-secondary)] p-1.5 rounded-full border border-[var(--border)]">
+            {navItems.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-bold font-mono uppercase transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-[var(--accent-primary)] text-black'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
                 {tab.label}
               </button>
             ))}
-            
-            <div className="relative">
-               <button onClick={() => setRampOpen(!rampOpen)} className="px-4 py-2 text-[10px] font-bold font-mono uppercase text-gray-500 hover:text-white flex items-center gap-1">
-                  ON/OFF RAMP <ChevronDown size={12}/>
-               </button>
-               {rampOpen && (
-                 <div className="absolute top-full mt-2 w-40 bg-[#0a0a0a] border border-white/20 rounded-lg overflow-hidden shadow-xl z-50">
-                    <a href="https://app.provex.com" target="_blank" className="block px-4 py-3 hover:bg-white/10 text-xs font-mono text-white">PROVEX.COM</a>
-                    <a href="https://peer.xyz" target="_blank" className="block px-4 py-3 hover:bg-white/10 text-xs font-mono text-white">PEER.XYZ</a>
-                 </div>
-               )}
-            </div>
-
-            <div className="w-px h-4 bg-white/10 mx-1"></div>
-            <button onClick={() => setActiveTab('wallet')} className={`px-4 py-2 rounded-full text-[10px] font-bold font-mono uppercase ${activeTab === 'wallet' ? 'bg-[var(--neon-yellow)] text-black' : 'text-gray-500 hover:text-white'}`}>
-               WALLET
-            </button>
           </nav>
-          
-          <button onClick={connect} className="px-6 py-2 border border-[var(--neon-yellow)]/50 text-[var(--neon-yellow)] hover:bg-[var(--neon-yellow)]/10 font-mono text-xs font-bold uppercase tracking-widest">
-            {wallet ? (wallet.slice(0,6) + '...' + wallet.slice(-4)) : 'CONNECT UPLINK'}
-          </button>
+
+          <div className="flex items-center gap-3">
+            <ThemeSwitcher currentTheme={currentTheme} setTheme={setCurrentTheme} />
+            
+            <button
+              onClick={connect}
+              className="px-4 py-2 border border-[var(--accent-primary)]/50 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 font-mono text-xs font-bold uppercase tracking-widest rounded"
+            >
+              {wallet ? (wallet.slice(0,6) + '...' + wallet.slice(-4)) : 'CONNECT'}
+            </button>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <CloseIcon size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </header>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-50 bg-[var(--bg-primary)] p-6">
+            <div className="flex justify-end mb-8">
+              <button onClick={() => setMobileMenuOpen(false)}>
+                <CloseIcon size={24} />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-4">
+              {navItems.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`px-4 py-3 rounded-lg text-left font-bold font-mono uppercase ${
+                    activeTab === tab.id
+                      ? 'bg-[var(--accent-primary)] text-black'
+                      : 'text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
 
         <div className="max-w-7xl mx-auto">
           {activeTab === 'landing' && <LandingPage setActiveTab={setActiveTab} />}
-          
-          {['mint', 'forge', 'yield'].includes(activeTab) && (
-            <div className="grid lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-3">
-                {activeTab === 'mint' && <MintView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
-                {activeTab === 'forge' && <ForgeInterface wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
-                {activeTab === 'yield' && <YieldView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
-              </div>
-              <div className="lg:col-span-1 space-y-4">
-                <RecentTransactions txs={transactions} />
-                <ProjectInfoSidebar />
-              </div>
-            </div>
-          )}
-          
+          {activeTab === 'mint' && <MintView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+          {activeTab === 'forge' && <ForgeInterface wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+          {activeTab === 'yield' && <YieldView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
           {activeTab === 'trajectory' && <TrajectoryView />}
-          
-          {activeTab === 'swap' && (
-            <div className="view-enter">
-              <h2 className="text-3xl font-bold text-white text-center mb-6">PITEAS DEX</h2>
-              <PiteasIframe />
-            </div>
+          {activeTab === 'wallet' && (
+            <WalletView
+              wallet={wallet}
+              balances={balances}
+              transactions={transactions}
+              connect={connect}
+              onBuy={handleBuy}
+              onSell={handleSell}
+            />
           )}
-          
-          {activeTab === 'wallet' && <WalletView wallet={wallet} balances={balances} />}
         </div>
       </div>
     </div>
@@ -1371,4 +1753,3 @@ const App = () => {
 };
 
 export default App;
-
