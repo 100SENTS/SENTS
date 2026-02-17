@@ -10,7 +10,7 @@ import {
   ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock,
   History, Repeat, Sun, Moon, Palette, Send, ShoppingCart,
   CreditCard, Repeat as SwapIcon, Menu, X as CloseIcon,
-  Copy
+  Copy, PlusCircle
 } from 'lucide-react';
 
 // ==============================================
@@ -253,7 +253,7 @@ const PROJECT_DETAILS = {
 };
 
 // ==============================================
-// STYLES (with restored grid and flow animation)
+// STYLES (with grid and flow animation)
 // ==============================================
 const baseStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
@@ -478,31 +478,6 @@ const PiteasIframe = ({ onClose }) => (
   </div>
 );
 
-// Recent Transactions (only used in Wallet)
-const RecentTransactions = ({ txs }) => {
-  if (!txs.length) {
-    return (
-      <div className="holo-card p-6 text-center text-[var(--text-secondary)] font-mono">
-        No transactions yet.
-      </div>
-    );
-  }
-  return (
-    <div className="holo-card p-4 max-h-80 overflow-y-auto">
-      <h3 className="text-sm font-mono text-[var(--accent-primary)] mb-3 flex items-center gap-2"><History size={14} /> RECENT TRANSACTIONS</h3>
-      {txs.map((tx, i) => (
-        <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border)] text-xs font-mono">
-          <span className="text-[var(--text-secondary)]">{tx.type}</span>
-          <span className="text-[var(--text-primary)]">{tx.amount}</span>
-          <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">
-            <ExternalLink size={12} />
-          </a>
-        </div>
-      ))}
-    </div>
-  );
-};
-
 // Theme Switcher
 const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -538,7 +513,7 @@ const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   );
 };
 
-// Flow Animation Component (replaces video)
+// Flow Animation Component
 const FlowAnimation = () => (
   <div className="holo-card p-8 max-w-4xl mx-auto">
     <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
@@ -579,7 +554,6 @@ const FlowAnimation = () => (
 // Landing Page
 const LandingPage = ({ setActiveTab }) => (
   <div className="view-enter max-w-6xl mx-auto px-4 py-12 space-y-16">
-    {/* Hero */}
     <div className="text-center">
       <h1 className="text-7xl font-black text-[var(--text-primary)] mb-4 tracking-tighter">
         100<span className="text-[var(--accent-primary)]">SENTS</span>
@@ -601,7 +575,6 @@ const LandingPage = ({ setActiveTab }) => (
       </div>
     </div>
 
-    {/* Quick Facts */}
     <div className="holo-card p-8 max-w-4xl mx-auto">
       <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">⚡ QUICK FACTS</h2>
       <div className="grid md:grid-cols-2 gap-6">
@@ -618,7 +591,6 @@ const LandingPage = ({ setActiveTab }) => (
       </div>
     </div>
 
-    {/* Detailed Explainer Sections */}
     <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
       <div className="holo-card p-6">
         <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🌌 OVERVIEW</h3>
@@ -646,10 +618,8 @@ const LandingPage = ({ setActiveTab }) => (
       </div>
     </div>
 
-    {/* Flow Animation (replaces video) */}
     <FlowAnimation />
 
-    {/* The Constant */}
     <div className="holo-card p-8 text-center max-w-3xl mx-auto">
       <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-4">🔮 THE CONSTANT – A WORLD FIRST</h2>
       <p className="text-[var(--text-secondary)] mb-4">
@@ -843,7 +813,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   );
 };
 
-// Forge Interface – with copy button for SENTS in output and redesigned recipient field
+// Forge Interface
 const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
@@ -1024,7 +994,6 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
                 </div>
               </div>
 
-              {/* Redesigned recipient field – privacy mixer style */}
               <div className="mt-4 p-4 border-2 border-[var(--accent-secondary)] rounded-lg bg-[var(--accent-secondary)]/10 relative">
                 <div className="absolute -top-3 left-4 px-2 bg-[var(--bg-secondary)] text-[var(--accent-secondary)] text-xs font-mono flex items-center gap-1">
                   <Shield size={12} /> PRIVACY MIXER
@@ -1496,15 +1465,124 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
   );
 };
 
-// Wallet View
-const WalletView = ({ wallet, balances, transactions, connect, onBuy, onSell, onSwap }) => {
-  const [showSwap, setShowSwap] = useState(false);
+// Custom Token Modal
+const AddTokenModal = ({ isOpen, onClose, onAdd }) => {
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const totalValue = balances.reduce((acc, b) => acc + (parseFloat(b.bal) * (b.symbol === '100' ? 1000 : 1)), 0); // rough estimate
+  const handleAdd = async () => {
+    if (!ethers.utils.isAddress(address)) {
+      setError('Invalid address');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await onAdd(address);
+      onClose();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div className="holo-card w-full max-w-md p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4">Add Custom Token</h3>
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Token Contract Address"
+          className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded mb-4"
+        />
+        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        <div className="flex gap-4">
+          <button
+            onClick={handleAdd}
+            disabled={loading}
+            className="flex-1 py-2 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 rounded"
+          >
+            {loading ? 'Adding...' : 'Add'}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 border border-[var(--border)] text-[var(--text-primary)] font-mono hover:bg-[var(--bg-secondary)] rounded"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Transaction History with tabs
+const TransactionHistory = ({ txs }) => {
+  const [view, setView] = useState('recent');
+  
+  const recentTxs = txs.slice(0, 20);
+  const displayTxs = view === 'recent' ? recentTxs : txs;
+
+  if (!txs.length) {
+    return (
+      <div className="holo-card p-6 text-center text-[var(--text-secondary)] font-mono">
+        No transactions yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className="holo-card p-4 max-h-96 overflow-y-auto">
+      <div className="flex gap-4 mb-4 border-b border-[var(--border)] pb-2">
+        <button
+          onClick={() => setView('recent')}
+          className={`text-sm font-mono px-2 py-1 rounded ${
+            view === 'recent' ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)]'
+          }`}
+        >
+          Recent (20)
+        </button>
+        <button
+          onClick={() => setView('all')}
+          className={`text-sm font-mono px-2 py-1 rounded ${
+            view === 'all' ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)]'
+          }`}
+        >
+          All History
+        </button>
+      </div>
+      <div className="space-y-2">
+        {displayTxs.map((tx, i) => (
+          <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border)] text-xs font-mono">
+            <span className="text-[var(--text-secondary)]">{tx.type}</span>
+            <span className="text-[var(--text-primary)]">{tx.amount}</span>
+            <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">
+              <ExternalLink size={12} />
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Wallet View (enhanced)
+const WalletView = ({ wallet, balances, transactions, connect, onBuy, onSell, onRefresh, onAddCustomToken }) => {
+  const [showSwap, setShowSwap] = useState(false);
+  const [showAddToken, setShowAddToken] = useState(false);
+
+  const totalValue = balances.reduce((acc, b) => acc + (parseFloat(b.bal) * (b.symbol === '100' ? 1000 : 1)), 0);
 
   return (
     <div className="view-enter max-w-4xl mx-auto px-4 py-8">
       {showSwap && <PiteasIframe onClose={() => setShowSwap(false)} />}
+      <AddTokenModal isOpen={showAddToken} onClose={() => setShowAddToken(false)} onAdd={onAddCustomToken} />
 
       <div className="holo-card p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -1536,11 +1614,22 @@ const WalletView = ({ wallet, balances, transactions, connect, onBuy, onSell, on
             <span className="text-xs font-mono">Send</span>
           </button>
         </div>
+
+        <div className="flex justify-end mt-4">
+          <button onClick={onRefresh} className="p-2 border border-[var(--border)] rounded hover:bg-[var(--bg-secondary)]">
+            <RefreshCw size={16} className="text-[var(--text-secondary)]" />
+          </button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
         <div className="holo-card p-6">
-          <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4">ASSETS</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-mono text-[var(--accent-primary)]">ASSETS</h3>
+            <button onClick={() => setShowAddToken(true)} className="text-[var(--accent-primary)] hover:text-[var(--accent-secondary)]">
+              <PlusCircle size={20} />
+            </button>
+          </div>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {balances.map((b, i) => (
               <div key={i} className="flex justify-between items-center p-3 bg-[var(--bg-primary)] rounded-lg">
@@ -1555,7 +1644,7 @@ const WalletView = ({ wallet, balances, transactions, connect, onBuy, onSell, on
         </div>
 
         <div>
-          <RecentTransactions txs={transactions} />
+          <TransactionHistory txs={transactions} />
         </div>
       </div>
     </div>
@@ -1589,8 +1678,8 @@ const App = () => {
   const [transactions, setTransactions] = useState([]);
   const [currentTheme, setCurrentTheme] = useState('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [customTokens, setCustomTokens] = useState([]);
 
-  // Apply theme
   useEffect(() => {
     const theme = THEMES[currentTheme];
     if (theme) {
@@ -1600,7 +1689,6 @@ const App = () => {
     }
   }, [currentTheme]);
 
-  // Initialize provider
   useEffect(() => {
     if (window.ethereum) {
       const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -1608,7 +1696,6 @@ const App = () => {
     }
   }, []);
 
-  // Load saved wallet and transactions from localStorage
   useEffect(() => {
     const savedWallet = localStorage.getItem('100sents_wallet');
     if (savedWallet && provider) {
@@ -1623,9 +1710,12 @@ const App = () => {
     if (savedTheme && THEMES[savedTheme]) {
       setCurrentTheme(savedTheme);
     }
+    const savedCustomTokens = localStorage.getItem('100sents_custom_tokens');
+    if (savedCustomTokens) {
+      setCustomTokens(JSON.parse(savedCustomTokens));
+    }
   }, [provider]);
 
-  // Save wallet and transactions when they change
   useEffect(() => {
     if (wallet) localStorage.setItem('100sents_wallet', wallet);
     else localStorage.removeItem('100sents_wallet');
@@ -1639,7 +1729,10 @@ const App = () => {
     localStorage.setItem('100sents_theme', currentTheme);
   }, [currentTheme]);
 
-  // Listen for account/chain changes
+  useEffect(() => {
+    localStorage.setItem('100sents_custom_tokens', JSON.stringify(customTokens));
+  }, [customTokens]);
+
   useEffect(() => {
     if (window.ethereum) {
       const handleAccountsChanged = (accounts) => {
@@ -1664,13 +1757,15 @@ const App = () => {
     if(!wallet || !provider) return;
     const signer = provider.getSigner();
     
-    const allTokens = [
-      { symbol: '100', name: 'The 100', addr: TOKEN_100_ADDRESS, dec: 18 },
-      { symbol: 'SENTS', name: '100SENTS Stable', addr: SENTS_ADDRESS, dec: 18 },
+    const builtInTokens = [
+      { symbol: '100', name: 'The 100', addr: TOKEN_100_ADDRESS, decimals: 18 },
+      { symbol: 'SENTS', name: '100SENTS Stable', addr: SENTS_ADDRESS, decimals: 18 },
       ...MINT_TOKENS,
       ...LP_TOKENS,
       ...RICH_TOKENS
     ];
+
+    const allTokens = [...builtInTokens, ...customTokens];
 
     const bals = [];
     for(let t of allTokens) {
@@ -1679,7 +1774,9 @@ const App = () => {
          const b = await c.balanceOf(wallet);
          const fmt = ethers.utils.formatUnits(b, t.decimals || 18);
          bals.push({ symbol: t.symbol, name: t.name, bal: parseFloat(fmt).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}), addr: t.addr });
-       } catch(e) { bals.push({ symbol: t.symbol, name: t.name, bal: '0.00', addr: t.addr }); }
+       } catch(e) { 
+         bals.push({ symbol: t.symbol, name: t.name, bal: '0.00', addr: t.addr }); 
+       }
     }
     setBalances(bals);
   };
@@ -1713,7 +1810,7 @@ const App = () => {
   };
 
   const addTransaction = (tx) => {
-    setTransactions(prev => [tx, ...prev].slice(0, 20));
+    setTransactions(prev => [tx, ...prev]);
   };
 
   const handleBuy = () => {
@@ -1722,6 +1819,16 @@ const App = () => {
 
   const handleSell = () => {
     window.open(RAMP_LINKS.peer, '_blank');
+  };
+
+  const handleAddCustomToken = async (address) => {
+    const tokenContract = new ethers.Contract(address, ERC20_ABI, provider);
+    const symbol = await tokenContract.symbol();
+    const decimals = await tokenContract.decimals();
+    const name = await tokenContract.name();
+    const newToken = { symbol, name, addr: address, decimals: decimals };
+    setCustomTokens(prev => [...prev, newToken]);
+    updateBalances();
   };
 
   const navItems = [
@@ -1745,7 +1852,6 @@ const App = () => {
             <span className="text-2xl font-bold tracking-widest text-[var(--text-primary)] font-mono">100SENTS</span>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2 bg-[var(--bg-secondary)] p-1.5 rounded-full border border-[var(--border)]">
             {navItems.map((tab) => (
               <button
@@ -1772,7 +1878,6 @@ const App = () => {
               {wallet ? (wallet.slice(0,6) + '...' + wallet.slice(-4)) : 'CONNECT'}
             </button>
 
-            {/* Mobile menu button */}
             <button
               className="md:hidden p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -1782,7 +1887,6 @@ const App = () => {
           </div>
         </header>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-[var(--bg-primary)] p-6">
             <div className="flex justify-end mb-8">
@@ -1825,6 +1929,8 @@ const App = () => {
               connect={connect}
               onBuy={handleBuy}
               onSell={handleSell}
+              onRefresh={updateBalances}
+              onAddCustomToken={handleAddCustomToken}
             />
           )}
         </div>
