@@ -843,7 +843,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   );
 };
 
-// Forge Interface – with copy button for SENS in output and redesigned recipient field
+// Forge Interface – with copy button for SENTS in output and redesigned recipient field
 const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
