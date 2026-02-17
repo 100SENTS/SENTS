@@ -12,19 +12,19 @@ import {
 } from 'lucide-react';
 
 // ==============================================
-// DEPLOYED CONTRACT ADDRESSES – UPDATED
+// DEPLOYED CONTRACT ADDRESSES – UPDATED WITH YOUR VALUES
 // ==============================================
-const MANAGER_ADDRESS = "0x3cbb97A5B89731Eb3424a818F148b5cB21Aa027b";
+const MANAGER_ADDRESS = "0x94681015615943E7cdB717c9689Ef7dbD7d85816";
 const TOKEN_100_ADDRESS = "0xaad060534d1BE34EFD24F919c0fa051F67b80C7F";
 const SENTS_ADDRESS = "0x7dF16f1c80A5c1AE4922dF141B976eD883d9F5b2";
 
 // LP Token Addresses
-const LP_100_SENTS = "0x23df1F336697B50DA0D6F1fdC4d765f98459e172";
-const LP_DAI_100 = "0x37582B81DAa89264b775746037f44978e3Ed1Aa3";
-const LP_DAI_SENTS = "0x7a92b06EfE2dC236B93B04C78dA3d3981143F003";
+const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F"; // ⚠️ Please verify this is the correct mainnet LP token
+const LP_100_DAI = "0x22914141b821e394804d767185909901FdA2efb0";      // New The 100/DAI LP
+const LP_SENTS_DAI = "0xda7772F53f4112E8537690cb37907d51C17b3630";  // New SENTS/DAI LP
 
-// DEX Pair for Chart (DAI/100)
-const DAI_100_PAIR = "0x37582b81daa89264b775746037f44978e3ed1aa3";
+// DEX Pair for Chart (now using the live The 100/DAI pool)
+const DAI_100_PAIR = "0x22914141b821e394804d767185909901FdA2efb0";
 
 const PULSECHAIN_CHAIN_ID = '0x171'; // 369
 const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
@@ -54,7 +54,8 @@ const MANAGER_ABI = [
   "function singleStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)",
   "function lpStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)",
   "function getStakedAmount(address user, bool isLP) view returns (uint256)",
-  "function ownerMint(address to, uint256 amount, bool isSents) external"
+  "function ownerMint(address to, uint256 amount, bool isSents) external",
+  "function getLpToken() view returns (address)"
 ];
 
 const ERC20_ABI = [
@@ -78,8 +79,8 @@ const MINT_TOKENS = [
 
 const LP_TOKENS = [
   { symbol: '100/SENTS LP', name: '100/SENTS PulseX LP', addr: LP_100_SENTS, decimals: 18 },
-  { symbol: 'DAI/100 LP', name: 'DAI/100 PulseX LP', addr: LP_DAI_100, decimals: 18 },
-  { symbol: 'DAI/SENTS LP', name: 'DAI/SENTS PulseX LP', addr: LP_DAI_SENTS, decimals: 18 },
+  { symbol: '100/DAI LP', name: '100/DAI PulseX LP', addr: LP_100_DAI, decimals: 18 },
+  { symbol: 'SENTS/DAI LP', name: 'SENTS/DAI PulseX LP', addr: LP_SENTS_DAI, decimals: 18 },
 ];
 
 const RICH_TOKENS = [
@@ -183,7 +184,7 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   );
 };
 
-// Dex Chart (DexScreener) – Updated to use DAI/100 pair for mint page
+// Dex Chart – Now using the live The 100/DAI pool
 const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
   const [expanded, setExpanded] = useState(false);
   
@@ -338,7 +339,7 @@ const LandingPage = ({ setActiveTab }) => (
   </div>
 );
 
-// Mint View
+// Mint View – Now uses the updated DAI_100_PAIR for the chart
 const MintView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
@@ -445,7 +446,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
           </p>
         </div>
 
-        {/* Chart now shows DAI/100 pair as requested */}
+        {/* Chart now shows the live The 100/DAI pool */}
         <DexChart pairAddress={DAI_100_PAIR} />
       </div>
 
@@ -502,7 +503,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   );
 };
 
-// Forge Interface
+// Forge Interface – unchanged
 const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
@@ -710,7 +711,7 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
   );
 };
 
-// Yield View (Staking) – Updated with correct LP token address
+// Yield View – unchanged but uses updated LP_100_SENTS
 const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [stakeType, setStakeType] = useState('single');
   const [amount, setAmount] = useState('');
@@ -723,8 +724,22 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
   const [stablecoins, setStablecoins] = useState([]);
   const [decimalsMap, setDecimalsMap] = useState({});
   const [stakeBalance, setStakeBalance] = useState('0');
+  const [lpTokenSet, setLpTokenSet] = useState(true);
 
-  // Fetch stake token balance (100 or LP)
+  useEffect(() => {
+    const checkLpToken = async () => {
+      if (!provider) return;
+      try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+        const lpAddr = await manager.getLpToken();
+        setLpTokenSet(lpAddr !== ethers.constants.AddressZero);
+      } catch {
+        setLpTokenSet(false);
+      }
+    };
+    checkLpToken();
+  }, [provider]);
+
   useEffect(() => {
     const fetchStakeBalance = async () => {
       if (!wallet || !provider) return;
@@ -740,7 +755,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
     fetchStakeBalance();
   }, [wallet, provider, stakeType]);
 
-  // Fetch all staking data
   const fetchData = async () => {
     if (!wallet || !provider) return;
     try {
@@ -797,6 +811,10 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
   const handleStake = async () => {
     if (!wallet) return connect();
     if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    if (stakeType === 'lp' && !lpTokenSet) {
+      alert('LP staking is not yet available');
+      return;
+    }
     setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'STAKE 100' : 'STAKE LP' });
 
     try {
@@ -912,11 +930,13 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
         </button>
         <button
           onClick={() => setStakeType('lp')}
+          disabled={!lpTokenSet}
           className={`px-6 py-2 font-mono text-sm ${
-            stakeType === 'lp' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'
+            stakeType === 'lp' ? 'bg-[var(--neon-orange)] text-black font-bold' : 
+            !lpTokenSet ? 'text-gray-600 cursor-not-allowed' : 'text-gray-500'
           }`}
         >
-          LP STAKE (100/SENTS)
+          LP STAKE (100/SENTS) {!lpTokenSet && '(coming soon)'}
         </button>
       </div>
 
@@ -1043,7 +1063,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
             >
               CLAIM FEES
             </button>
-            {stakeType === 'lp' && (
+            {stakeType === 'lp' && lpTokenSet && (
               <button
                 onClick={handleClaimLp}
                 className="flex-1 py-3 bg-[var(--neon-orange)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-yellow)]"
@@ -1076,7 +1096,7 @@ const WalletView = ({ wallet, balances }) => (
   </div>
 );
 
-// Trajectory View (Roadmap)
+// Trajectory View
 const TrajectoryView = () => (
   <div className="view-enter max-w-4xl mx-auto space-y-4 pb-20">
      <h2 className="text-4xl font-bold text-white text-center mb-12">TRAJECTORY</h2>
@@ -1103,7 +1123,6 @@ const App = () => {
   const [rampOpen, setRampOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
 
-  // Initialize provider
   useEffect(() => {
     if (window.ethereum) {
       const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -1111,7 +1130,6 @@ const App = () => {
     }
   }, []);
 
-  // Load saved wallet and transactions from localStorage
   useEffect(() => {
     const savedWallet = localStorage.getItem('100sents_wallet');
     if (savedWallet && provider) {
@@ -1124,7 +1142,6 @@ const App = () => {
     }
   }, [provider]);
 
-  // Save wallet and transactions when they change
   useEffect(() => {
     if (wallet) localStorage.setItem('100sents_wallet', wallet);
     else localStorage.removeItem('100sents_wallet');
@@ -1134,7 +1151,6 @@ const App = () => {
     localStorage.setItem('100sents_txs', JSON.stringify(transactions));
   }, [transactions]);
 
-  // Listen for account/chain changes
   useEffect(() => {
     if (window.ethereum) {
       const handleAccountsChanged = (accounts) => {
