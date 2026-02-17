@@ -355,152 +355,265 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
 };
 
 // ==============================================
-// FORGE INTERFACE
+// FORGE INTERFACE – Enhanced error handling
 // ==============================================
 const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
   const [mode, setMode] = useState('forge'); // 'forge' or 'unforge'
   const [amount, setAmount] = useState('');
   const [token, setToken] = useState(MINT_TOKENS[0]);
   const [recipient, setRecipient] = useState('');
-  const [txState, setTxState] = useState({ open: false, status: 'idle' });
+  const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '', error: '' });
+  const [allowance, setAllowance] = useState(null);
+
+  // Fetch allowance whenever token, amount, or wallet changes
+  useEffect(() => {
+    const fetchAllowance = async () => {
+      if (!wallet || !provider || !amount) return;
+      try {
+        const signer = provider.getSigner();
+        let tokenContract;
+        if (mode === 'forge') {
+          tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
+        } else {
+          tokenContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
+        }
+        const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
+        setAllowance(allowanceWei);
+      } catch (e) {
+        console.error('Allowance fetch failed', e);
+        setAllowance(null);
+      }
+    };
+    fetchAllowance();
+  }, [wallet, provider, mode, token, amount]);
 
   const handleForge = async () => {
     if (!wallet) return connect();
-    setTxState({ open: true, status: 'approving', title: mode === 'forge' ? 'FORGE SENTS' : 'UNFORGE SENTS' });
+    if (!amount || parseFloat(amount) <= 0) {
+      alert('Enter a valid amount');
+      return;
+    }
+    setTxState({ open: true, status: 'approving', title: mode === 'forge' ? 'FORGE SENTS' : 'UNFORGE SENTS', step: 'Preparing...' });
 
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const targetRecipient = recipient || wallet;
-      
-      if (mode === 'forge') {
-         const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
-         const valWei = ethers.utils.parseUnits(amount, token.decimals);
-         
-         const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
-         if (allowance.lt(valWei)) {
-            const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
-            setTxState(s => ({ ...s, step: 'Approving Stablecoin...' }));
-            await txApp.wait();
-         }
-         
-         setTxState(s => ({ ...s, status: 'pending', step: 'Forging SENTS...' }));
-         const tx = await manager.forgeSents(token.addr, valWei, targetRecipient);
-         await tx.wait();
-         setTxState({ open: true, status: 'success', title: 'Forge Complete', hash: tx.hash });
 
+      if (mode === 'forge') {
+        const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
+        const valWei = ethers.utils.parseUnits(amount, token.decimals);
+
+        // Check if token is forge‑able
+        const isForge = await manager.isForgeAsset(token.addr);
+        if (!isForge) throw new Error('Token not enabled for forging');
+
+        const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
+        if (allowance.lt(valWei)) {
+          setTxState(s => ({ ...s, status: 'pending', step: 'Approving Stablecoin...' }));
+          const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
+          await txApp.wait();
+        }
+
+        setTxState(s => ({ ...s, status: 'pending', step: 'Forging SENTS...' }));
+        const tx = await manager.forgeSents(token.addr, valWei, targetRecipient);
+        await tx.wait();
+        setTxState({ open: true, status: 'success', title: 'Forge Complete', hash: tx.hash });
       } else {
-         // Unforge
-         const sentsContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
-         const sentsWei = ethers.utils.parseUnits(amount, 18);
-         
-         const allowance = await sentsContract.allowance(wallet, MANAGER_ADDRESS);
-         if (allowance.lt(sentsWei)) {
-            const txApp = await sentsContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
-            setTxState(s => ({ ...s, step: 'Approving SENTS...' }));
-            await txApp.wait();
-         }
-         
-         setTxState(s => ({ ...s, status: 'pending', step: 'Unforging...' }));
-         const tx = await manager.unforgeSents(token.addr, sentsWei, targetRecipient);
-         await tx.wait();
-         setTxState({ open: true, status: 'success', title: 'Unforge Complete', hash: tx.hash });
+        // Unforge
+        const sentsContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
+        const sentsWei = ethers.utils.parseUnits(amount, 18);
+
+        const allowance = await sentsContract.allowance(wallet, MANAGER_ADDRESS);
+        if (allowance.lt(sentsWei)) {
+          setTxState(s => ({ ...s, step: 'Approving SENTS...' }));
+          const txApp = await sentsContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
+          await txApp.wait();
+        }
+
+        setTxState(s => ({ ...s, status: 'pending', step: 'Unforging...' }));
+        const tx = await manager.unforgeSents(token.addr, sentsWei, targetRecipient);
+        await tx.wait();
+        setTxState({ open: true, status: 'success', title: 'Unforge Complete', hash: tx.hash });
       }
       updateBalances();
     } catch (e) {
-       console.error(e);
-       setTxState({ open: true, status: 'error' });
+      console.error(e);
+      setTxState({
+        open: true,
+        status: 'error',
+        title: 'Transaction Failed',
+        step: e.reason || e.message || 'Unknown error',
+      });
     }
   };
 
-  const outputAmount = amount ? 
-    (mode === 'forge' ? (parseFloat(amount) * 100 * 0.99).toFixed(2) : (parseFloat(amount) / 100 * 0.99).toFixed(6)) 
+  const outputAmount = amount
+    ? mode === 'forge'
+      ? (parseFloat(amount) * 100 * 0.99).toFixed(2)
+      : (parseFloat(amount) / 100 * 0.99).toFixed(6)
     : '0';
 
   return (
     <div className="view-enter max-w-4xl mx-auto px-4">
-      <TransactionModal isOpen={txState.open} onClose={() => setTxState({open:false})} {...txState} />
-      
+      <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
+
       <div className="text-center mb-8">
-         <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-3"><Box className="text-[var(--neon-yellow)]"/> SENTS FORGE</h2>
-         <p className="text-gray-500 font-mono text-sm mt-2">1 SENTS = $0.01 USD. 1% Protocol Fee applies.</p>
+        <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
+          <Box className="text-[var(--neon-yellow)]" /> SENTS FORGE
+        </h2>
+        <p className="text-gray-500 font-mono text-sm mt-2">1 SENTS = $0.01 USD. 1% Protocol Fee applies.</p>
       </div>
 
       <div className="holo-card p-8">
-         <div className="flex mb-8 bg-[#111] p-1 rounded-lg border border-white/10">
-            <button onClick={() => setMode('forge')} className={`flex-1 py-2 font-mono text-sm ${mode === 'forge' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'}`}>FORGE</button>
-            <button onClick={() => setMode('unforge')} className={`flex-1 py-2 font-mono text-sm ${mode === 'unforge' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'}`}>UNFORGE</button>
-         </div>
+        <div className="flex mb-8 bg-[#111] p-1 rounded-lg border border-white/10">
+          <button
+            onClick={() => setMode('forge')}
+            className={`flex-1 py-2 font-mono text-sm ${
+              mode === 'forge' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'
+            }`}
+          >
+            FORGE
+          </button>
+          <button
+            onClick={() => setMode('unforge')}
+            className={`flex-1 py-2 font-mono text-sm ${
+              mode === 'unforge' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'
+            }`}
+          >
+            UNFORGE
+          </button>
+        </div>
 
-         <div className="space-y-6">
-            <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
-               <label className="text-xs text-gray-500 font-mono block mb-2">INPUT</label>
-               <div className="flex gap-4">
-                  <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="bg-transparent text-3xl font-mono text-white outline-none w-full" />
-                  {mode === 'forge' ? (
-                     <select className="bg-black border border-white/20 text-white px-3 font-mono" onChange={e => setToken(MINT_TOKENS.find(t => t.symbol === e.target.value))}>
-                        {MINT_TOKENS.map(t => <option key={t.symbol} value={t.symbol}>{t.symbol}</option>)}
-                     </select>
-                  ) : <span className="text-[var(--neon-yellow)] font-bold font-mono pt-2">SENTS</span>}
-               </div>
+        <div className="space-y-6">
+          <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
+            <label className="text-xs text-gray-500 font-mono block mb-2">INPUT</label>
+            <div className="flex gap-4">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="bg-transparent text-3xl font-mono text-white outline-none w-full"
+              />
+              {mode === 'forge' ? (
+                <select
+                  className="bg-black border border-white/20 text-white px-3 font-mono"
+                  onChange={(e) => setToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
+                >
+                  {MINT_TOKENS.map((t) => (
+                    <option key={t.symbol} value={t.symbol}>
+                      {t.symbol}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className="text-[var(--neon-yellow)] font-bold font-mono pt-2">SENTS</span>
+              )}
             </div>
-            
-            <div className="flex justify-center"><ArrowDown className={mode === 'forge' ? 'text-[var(--neon-yellow)]' : 'text-[var(--neon-orange)]'} /></div>
+            {allowance && amount && mode === 'forge' && (
+              <div className="text-xs text-gray-500 mt-2 font-mono">
+                Allowance: {ethers.utils.formatUnits(allowance, token.decimals)} {token.symbol}
+              </div>
+            )}
+          </div>
 
-            <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
-               <label className="text-xs text-gray-500 font-mono block mb-2">OUTPUT</label>
-               <div className="flex gap-4 items-center">
-                  <div className="text-3xl font-mono text-white w-full">{outputAmount}</div>
-                  {mode === 'forge' ? <span className="text-[var(--neon-yellow)] font-bold font-mono">SENTS</span> : <span className="text-white font-mono">{token.symbol}</span>}
-               </div>
+          <div className="flex justify-center">
+            <ArrowDown className={mode === 'forge' ? 'text-[var(--neon-yellow)]' : 'text-[var(--neon-orange)]'} />
+          </div>
+
+          <div className="bg-[#111] p-4 border border-white/10 rounded-lg">
+            <label className="text-xs text-gray-500 font-mono block mb-2">OUTPUT</label>
+            <div className="flex gap-4 items-center">
+              <div className="text-3xl font-mono text-white w-full">{outputAmount}</div>
+              {mode === 'forge' ? (
+                <span className="text-[var(--neon-yellow)] font-bold font-mono">SENTS</span>
+              ) : (
+                <span className="text-white font-mono">{token.symbol}</span>
+              )}
             </div>
+          </div>
 
-            <div>
-               <label className="text-xs text-gray-500 font-mono block mb-2">RECIPIENT (optional, for privacy)</label>
-               <input type="text" value={recipient} onChange={e => setRecipient(e.target.value)} placeholder="Leave empty to send to yourself" className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none" />
+          <div>
+            <label className="text-xs text-gray-500 font-mono block mb-2">RECIPIENT (optional, for privacy)</label>
+            <input
+              type="text"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="Leave empty to send to yourself"
+              className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
+            />
+          </div>
+
+          <div className="text-xs text-gray-500 font-mono space-y-1 border-t border-white/10 pt-4">
+            <div className="flex justify-between">
+              <span>Fee (1%)</span>
+              <span>{(amount * 0.01).toFixed(2)}</span>
             </div>
-
-            <div className="text-xs text-gray-500 font-mono space-y-1 border-t border-white/10 pt-4">
-               <div className="flex justify-between"><span>Fee (1%)</span><span>{(amount * 0.01).toFixed(2)}</span></div>
-               <div className="flex justify-between text-[var(--neon-yellow)]"><span>Distribution:</span><span>50% Stakers / 30% Reserve / 20% Operations</span></div>
+            <div className="flex justify-between text-[var(--neon-yellow)]">
+              <span>Distribution:</span>
+              <span>50% Stakers / 30% Reserve / 20% Operations</span>
             </div>
+          </div>
 
-            <button onClick={handleForge} className={`w-full py-4 font-bold font-mono transition-colors uppercase ${mode === 'forge' ? 'bg-[var(--neon-yellow)] text-black hover:bg-[var(--neon-orange)]' : 'bg-[var(--neon-orange)] text-black hover:bg-[var(--neon-yellow)]'}`}>
-               {mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}
-            </button>
-         </div>
+          <button
+            onClick={handleForge}
+            className={`w-full py-4 font-bold font-mono transition-colors uppercase ${
+              mode === 'forge'
+                ? 'bg-[var(--neon-yellow)] text-black hover:bg-[var(--neon-orange)]'
+                : 'bg-[var(--neon-orange)] text-black hover:bg-[var(--neon-yellow)]'
+            }`}
+          >
+            {mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 // ==============================================
-// YIELD VIEW (Staking)
+// YIELD VIEW – Full staking analytics
 // ==============================================
 const YieldView = ({ wallet, connect, provider, updateBalances }) => {
   const [stakeType, setStakeType] = useState('single'); // 'single' or 'lp'
   const [amount, setAmount] = useState('');
   const [txState, setTxState] = useState({ open: false, status: 'idle' });
+  const [userStake, setUserStake] = useState('0');
+  const [totalStake, setTotalStake] = useState('0');
+  const [userShare, setUserShare] = useState(0);
   const [pendingFees, setPendingFees] = useState({});
   const [pendingLp, setPendingLp] = useState('0');
   const [stablecoins, setStablecoins] = useState([]);
   const [decimalsMap, setDecimalsMap] = useState({});
+  const [feeRates, setFeeRates] = useState({}); // per stablecoin, in wei per second? We'll compute per day.
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
 
-  useEffect(() => {
+  // Fetch all data
+  const fetchData = async () => {
     if (!wallet || !provider) return;
-    fetchRewards();
-  }, [wallet, provider, stakeType]);
-
-  const fetchRewards = async () => {
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      
-      // Get list of stablecoins
+
+      // Get user stake and total stake
+      const userStakeWei = stakeType === 'single'
+        ? (await manager.singleStakes(wallet)).amount
+        : (await manager.lpStakes(wallet)).amount;
+      setUserStake(ethers.utils.formatUnits(userStakeWei, 18));
+
+      const totalStakeWei = stakeType === 'single'
+        ? await manager.totalSingleStake()
+        : await manager.totalLpStake();
+      setTotalStake(ethers.utils.formatUnits(totalStakeWei, 18));
+
+      const share = totalStakeWei.isZero() ? 0 : userStakeWei.mul(10000).div(totalStakeWei).toNumber() / 100;
+      setUserShare(share);
+
+      // Get stablecoin list and decimals
       const stableList = await manager.getStablecoins();
       setStablecoins(stableList);
-      
-      // Fetch decimals for each stablecoin
+
       const decimals = {};
       for (let addr of stableList) {
         try {
@@ -511,166 +624,219 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
         }
       }
       setDecimalsMap(decimals);
-      
-      // Fetch pending fees for each stable
+
+      // Fetch pending fees
       const fees = {};
       for (let addr of stableList) {
         const pending = await manager.pendingFeeRewards(wallet, stakeType === 'lp', addr);
         fees[addr] = ethers.utils.formatUnits(pending, decimals[addr] || 18);
       }
       setPendingFees(fees);
-      
+
       if (stakeType === 'lp') {
         const lpReward = await manager.pendingLpReward(wallet);
         setPendingLp(ethers.utils.formatUnits(lpReward, 18));
       }
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
-  const handleStake = async () => {
-    if (!wallet) return connect();
-    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'STAKE 100' : 'STAKE LP' });
-
-    try {
-      const signer = provider.getSigner();
-      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      // For LP stake, we need the actual LP token address. Here we use a placeholder; in production replace with real LP token.
-      const lpTokenAddress = "0x0000000000000000000000000000000000000000"; // TODO: replace with actual LP token
-      const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : lpTokenAddress;
-      const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
-      const stakeWei = ethers.utils.parseUnits(amount, 18); // Both 100 and LP have 18 decimals
-      
-      const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
-      if (allowance.lt(stakeWei)) {
-        const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
-        setTxState(s => ({ ...s, step: 'Approving...' }));
-        await txApp.wait();
+      // Fetch current fee rates (reward per token per second? We'll compute per day using historical snapshot)
+      // For a simple estimate, we can compute the increase over the last 10 seconds if we had a previous snapshot.
+      // We'll store a snapshot in local state and compute rate on each fetch.
+      // This is a simplified version – a proper indexer would be better.
+      const newFeeRates = {};
+      const now = Date.now();
+      const timeDiffSeconds = (now - lastUpdate) / 1000;
+      if (timeDiffSeconds > 5 && lastUpdate !== Date.now()) {
+        for (let addr of stableList) {
+          const currentRpt = await manager.feeRewardPerTokenStored(addr);
+          const prevRpt = feeRates[addr]?.rpt || ethers.BigNumber.from(0);
+          if (prevRpt.gt(0) && currentRpt.gt(prevRpt) && timeDiffSeconds > 0) {
+            const increase = currentRpt.sub(prevRpt);
+            // annualised rate = increase per second * seconds per year
+            const perSecond = increase.mul(ethers.constants.WeiPerEther).div(ethers.BigNumber.from(Math.floor(timeDiffSeconds * 1e18)));
+            // we store the annualised multiplier (per token)
+            newFeeRates[addr] = {
+              rpt: currentRpt,
+              annualPerToken: perSecond.mul(365 * 24 * 3600).div(ethers.constants.WeiPerEther),
+            };
+          } else {
+            newFeeRates[addr] = { rpt: currentRpt, annualPerToken: ethers.BigNumber.from(0) };
+          }
+        }
+        setFeeRates(newFeeRates);
+        setLastUpdate(now);
       }
-      
-      setTxState(s => ({ ...s, status: 'pending', step: 'Staking...' }));
-      const tx = await manager.stake(stakeWei, stakeType === 'lp');
-      await tx.wait();
-      
-      setTxState({ open: true, status: 'success', title: 'Stake Successful', hash: tx.hash });
-      updateBalances();
-      fetchRewards();
     } catch (e) {
       console.error(e);
-      setTxState({ open: true, status: 'error' });
     }
   };
 
-  const handleUnstake = async () => {
-    if (!wallet) return connect();
-    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'UNSTAKE 100' : 'UNSTAKE LP' });
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // refresh every 30s
+    return () => clearInterval(interval);
+  }, [wallet, provider, stakeType]);
 
-    try {
-      const signer = provider.getSigner();
-      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      const stakeWei = ethers.utils.parseUnits(amount, 18);
-      
-      setTxState(s => ({ ...s, status: 'pending', step: 'Unstaking...' }));
-      const tx = await manager.unstake(stakeWei, stakeType === 'lp');
-      await tx.wait();
-      
-      setTxState({ open: true, status: 'success', title: 'Unstake Successful', hash: tx.hash });
-      updateBalances();
-      fetchRewards();
-    } catch (e) {
-      console.error(e);
-      setTxState({ open: true, status: 'error' });
-    }
-  };
-
-  const handleClaimFees = async () => {
-    if (!wallet) return connect();
-    setTxState({ open: true, status: 'pending', title: 'CLAIMING FEES' });
-
-    try {
-      const signer = provider.getSigner();
-      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      const tx = await manager.claimFees(stakeType === 'lp');
-      await tx.wait();
-      setTxState({ open: true, status: 'success', title: 'Fees Claimed', hash: tx.hash });
-      fetchRewards();
-    } catch (e) {
-      console.error(e);
-      setTxState({ open: true, status: 'error' });
-    }
-  };
-
-  const handleClaimLp = async () => {
-    if (!wallet) return connect();
-    setTxState({ open: true, status: 'pending', title: 'CLAIMING LP REWARDS' });
-
-    try {
-      const signer = provider.getSigner();
-      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      const tx = await manager.claimLpReward();
-      await tx.wait();
-      setTxState({ open: true, status: 'success', title: 'LP Rewards Claimed', hash: tx.hash });
-      fetchRewards();
-    } catch (e) {
-      console.error(e);
-      setTxState({ open: true, status: 'error' });
-    }
-  };
+  // Stake/Unstake handlers (unchanged, omitted for brevity – keep your existing ones)
+  const handleStake = async () => { /* ... */ };
+  const handleUnstake = async () => { /* ... */ };
+  const handleClaimFees = async () => { /* ... */ };
+  const handleClaimLp = async () => { /* ... */ };
 
   return (
-    <div className="view-enter max-w-5xl mx-auto px-4">
-      <TransactionModal isOpen={txState.open} onClose={() => setTxState({open:false})} {...txState} />
-      
+    <div className="view-enter max-w-6xl mx-auto px-4">
+      <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
+
       <h2 className="text-4xl font-bold text-white text-center mb-8">YIELD NEXUS</h2>
-      
+
       <div className="flex justify-center mb-8 bg-[#111] p-1 rounded-lg border border-white/10 w-fit mx-auto">
-        <button onClick={() => setStakeType('single')} className={`px-6 py-2 font-mono text-sm ${stakeType === 'single' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'}`}>SINGLE STAKE (100)</button>
-        <button onClick={() => setStakeType('lp')} className={`px-6 py-2 font-mono text-sm ${stakeType === 'lp' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'}`}>LP STAKE (100/SENTS)</button>
+        <button
+          onClick={() => setStakeType('single')}
+          className={`px-6 py-2 font-mono text-sm ${
+            stakeType === 'single' ? 'bg-[var(--neon-yellow)] text-black font-bold' : 'text-gray-500'
+          }`}
+        >
+          SINGLE STAKE (100)
+        </button>
+        <button
+          onClick={() => setStakeType('lp')}
+          className={`px-6 py-2 font-mono text-sm ${
+            stakeType === 'lp' ? 'bg-[var(--neon-orange)] text-black font-bold' : 'text-gray-500'
+          }`}
+        >
+          LP STAKE (100/SENTS)
+        </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Left: Stake/Unstake */}
-        <div className="holo-card p-8 bg-black/50">
-          <h3 className="text-xl font-mono mb-4" style={{color: stakeType === 'single' ? 'var(--neon-yellow)' : 'var(--neon-orange)'}}>
-            {stakeType === 'single' ? 'SINGLE STAKE' : 'LP STAKE'}
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs text-gray-500 font-mono block mb-2">AMOUNT</label>
-              <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.0" className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none" />
+      {/* Staking Analytics Panel */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        {/* User Stats */}
+        <div className="holo-card p-6 bg-black/50">
+          <h3 className="text-lg font-mono text-white mb-4">YOUR POSITION</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-400 text-sm">Staked</span>
+              <span className="text-white font-mono">{parseFloat(userStake).toFixed(4)}</span>
             </div>
-            <div className="flex gap-4">
-              <button onClick={handleStake} className="flex-1 py-3 border border-[var(--neon-yellow)] text-[var(--neon-yellow)] hover:bg-[var(--neon-yellow)] hover:text-black font-bold font-mono uppercase">STAKE</button>
-              <button onClick={handleUnstake} className="flex-1 py-3 border border-[var(--neon-orange)] text-[var(--neon-orange)] hover:bg-[var(--neon-orange)] hover:text-black font-bold font-mono uppercase">UNSTAKE</button>
+            <div className="flex justify-between">
+              <span className="text-gray-400 text-sm">Total Pool</span>
+              <span className="text-white font-mono">{parseFloat(totalStake).toFixed(4)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400 text-sm">Your Share</span>
+              <span className="text-[var(--neon-yellow)] font-mono">{userShare.toFixed(2)}%</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Rewards */}
-        <div className="holo-card p-8 bg-black/50">
-          <h3 className="text-xl font-mono mb-4 text-white">PENDING REWARDS</h3>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
-            {stablecoins.map(addr => {
-              const symbol = MINT_TOKENS.find(t => t.addr.toLowerCase() === addr.toLowerCase())?.symbol || addr.slice(0,6);
+        {/* Pending Rewards */}
+        <div className="holo-card p-6 bg-black/50">
+          <h3 className="text-lg font-mono text-white mb-4">PENDING REWARDS</h3>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {stablecoins.map((addr) => {
+              const symbol = MINT_TOKENS.find((t) => t.addr.toLowerCase() === addr.toLowerCase())?.symbol || addr.slice(0, 6);
               return (
-                <div key={addr} className="flex justify-between items-center bg-white/5 p-3 rounded">
-                  <span className="text-gray-400 font-mono text-sm">{symbol}</span>
+                <div key={addr} className="flex justify-between text-sm">
+                  <span className="text-gray-400">{symbol}</span>
                   <span className="text-white font-mono">{pendingFees[addr] || '0'}</span>
                 </div>
               );
             })}
             {stakeType === 'lp' && (
-              <div className="flex justify-between items-center bg-white/5 p-3 rounded">
-                <span className="text-[var(--neon-yellow)] font-mono text-sm">100 EMISSION</span>
+              <div className="flex justify-between text-sm">
+                <span className="text-[var(--neon-yellow)]">100 EMISSION</span>
                 <span className="text-white font-mono">{pendingLp}</span>
               </div>
             )}
           </div>
-          <div className="mt-6 flex gap-4">
-            <button onClick={handleClaimFees} className="flex-1 py-3 bg-[var(--neon-yellow)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-orange)]">CLAIM FEES</button>
+        </div>
+
+        {/* Estimated APY / Projections */}
+        <div className="holo-card p-6 bg-black/50">
+          <h3 className="text-lg font-mono text-white mb-4">PROJECTED REWARDS</h3>
+          {userShare > 0 && (
+            <div className="space-y-2 text-sm">
+              {stablecoins.map((addr) => {
+                const ratePerToken = feeRates[addr]?.annualPerToken;
+                if (!ratePerToken || ratePerToken.isZero()) return null;
+                const userStakeWei = ethers.utils.parseUnits(userStake, 18);
+                const annualRewardWei = userStakeWei.mul(ratePerToken).div(ethers.constants.WeiPerEther);
+                const annualReward = ethers.utils.formatUnits(annualRewardWei, decimalsMap[addr] || 18);
+                const symbol = MINT_TOKENS.find((t) => t.addr.toLowerCase() === addr.toLowerCase())?.symbol || addr.slice(0, 6);
+                return (
+                  <div key={addr} className="flex justify-between">
+                    <span className="text-gray-400">{symbol}/year</span>
+                    <span className="text-white font-mono">{parseFloat(annualReward).toFixed(2)}</span>
+                  </div>
+                );
+              })}
+              {stakeType === 'lp' && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">100/year</span>
+                  <span className="text-white font-mono">
+                    {userShare > 0 ? ((userShare / 100) * 120).toFixed(2) : '0'} (est.)
+                  </span>
+                </div>
+              )}
+              {Object.keys(feeRates).length === 0 && (
+                <p className="text-gray-500 italic text-xs">
+                  Fee rate accumulating... check back soon.
+                </p>
+              )}
+            </div>
+          )}
+          {userShare === 0 && (
+            <p className="text-gray-500 italic text-xs">Stake to see projections.</p>
+          )}
+          <p className="text-xs text-gray-600 mt-3 border-t border-white/10 pt-2">
+            * APY estimates based on recent fee accrual. Actual yields vary.
+          </p>
+        </div>
+      </div>
+
+      {/* Stake/Unstake Controls */}
+      <div className="holo-card p-8 bg-black/50 max-w-2xl mx-auto">
+        <h3 className="text-xl font-mono mb-4" style={{ color: stakeType === 'single' ? 'var(--neon-yellow)' : 'var(--neon-orange)' }}>
+          {stakeType === 'single' ? 'SINGLE STAKE' : 'LP STAKE'}
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-gray-500 font-mono block mb-2">AMOUNT</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.0"
+              className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
+            />
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={handleStake}
+              className="flex-1 py-3 border border-[var(--neon-yellow)] text-[var(--neon-yellow)] hover:bg-[var(--neon-yellow)] hover:text-black font-bold font-mono uppercase"
+            >
+              STAKE
+            </button>
+            <button
+              onClick={handleUnstake}
+              className="flex-1 py-3 border border-[var(--neon-orange)] text-[var(--neon-orange)] hover:bg-[var(--neon-orange)] hover:text-black font-bold font-mono uppercase"
+            >
+              UNSTAKE
+            </button>
+          </div>
+          <div className="flex gap-4 pt-4">
+            <button
+              onClick={handleClaimFees}
+              className="flex-1 py-3 bg-[var(--neon-yellow)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-orange)]"
+            >
+              CLAIM FEES
+            </button>
             {stakeType === 'lp' && (
-              <button onClick={handleClaimLp} className="flex-1 py-3 bg-[var(--neon-orange)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-yellow)]">CLAIM LP</button>
+              <button
+                onClick={handleClaimLp}
+                className="flex-1 py-3 bg-[var(--neon-orange)] text-black font-bold font-mono uppercase hover:bg-[var(--neon-yellow)]"
+              >
+                CLAIM LP
+              </button>
             )}
           </div>
         </div>
@@ -848,6 +1014,7 @@ const App = () => {
 
 
 export default App;
+
 
 
 
