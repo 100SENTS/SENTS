@@ -68,14 +68,12 @@ const SENTS_ABI = [
 // APPROVED ASSETS (PulseChain Mainnet)
 // ==============================================
 const MINT_TOKENS = [
-  { symbol: 'WPLS', name: 'Wrapped Pulse', addr: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27", decimals: 18 },
   { symbol: 'DAI', name: 'Dai from Ethereum', addr: "0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals: 18 },
   { symbol: 'USDC', name: 'USDC from Ethereum', addr: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", decimals: 6 },
   { symbol: 'USDT', name: 'USDT from Ethereum', addr: "0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f", decimals: 6 },
 ];
 
 const RICH_TOKENS = [
-  { symbol: 'WPLS', addr: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27", decimals: 18 },
   { symbol: 'PLSX', addr: "0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals: 18 },
   { symbol: 'INC', addr: "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals: 18 },
   { symbol: 'HEX', addr: "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals: 8 },
@@ -850,5 +848,6 @@ const App = () => {
 
 
 export default App;
+
 
 
