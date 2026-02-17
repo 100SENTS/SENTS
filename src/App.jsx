@@ -3,25 +3,34 @@ import { ethers } from 'ethers';
 import {
   Wallet, ArrowRight, CheckCircle, AlertTriangle,
   Zap, Layers, TrendingUp, Shield, Activity,
-  RefreshCw, ChevronLeft, Hourglass, ExternalLink,
-  ArrowDown, Flame, Coins, Scale, LayoutDashboard,
+  RefreshCw, Hourglass, ExternalLink,
+  ArrowDown, Flame, Coins, Scale,
   Box, Sparkles, Network, XCircle, Ghost,
   Fingerprint, FileKey, X, Radio, Hexagon, Rocket, Map,
-  ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock
+  ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock,
+  History, Repeat, LinkIcon
 } from 'lucide-react';
 
 // ==============================================
 // DEPLOYED CONTRACT ADDRESSES – UPDATED
 // ==============================================
-const MANAGER_ADDRESS = "0xb95757494Fa7d550aA4aFE1D8730934F59D4A222";
-const TOKEN_100_ADDRESS = "0x672Cc5284f42217F6B429dc4e6DEC56593a922A5";
-const SENTS_ADDRESS = "0xa9488636da235Ee0EEa97D1b6C0273A045BBe200";
+const MANAGER_ADDRESS = "0x3cbb97A5B89731Eb3424a818F148b5cB21Aa027b";
+const TOKEN_100_ADDRESS = "0xaad060534d1BE34EFD24F919c0fa051F67b80C7F";
+const SENTS_ADDRESS = "0x7dF16f1c80A5c1AE4922dF141B976eD883d9F5b2";
+
+// LP Token Addresses
+const LP_100_SENTS = "0x23df1F336697B50DA0D6F1fdC4d765f98459e172";
+const LP_DAI_100 = "0x37582B81DAa89264b775746037f44978e3Ed1Aa3";
+const LP_DAI_SENTS = "0x7a92b06EfE2dC236B93B04C78dA3d3981143F003";
+
+// DEX Pair for Chart (DAI/100)
+const DAI_100_PAIR = "0x37582b81daa89264b775746037f44978e3ed1aa3";
 
 const PULSECHAIN_CHAIN_ID = '0x171'; // 369
 const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
 
 // ==============================================
-// COMPLETE ABI FOR MANAGER (all functions used)
+// COMPLETE ABI FOR MANAGER
 // ==============================================
 const MANAGER_ABI = [
   "function mintThe100(uint256 amount100) external payable",
@@ -43,7 +52,9 @@ const MANAGER_ABI = [
   "function isForgeAsset(address) view returns (bool)",
   "function assetRates(address) view returns (uint256)",
   "function singleStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)",
-  "function lpStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)"
+  "function lpStakes(address) view returns (uint256 amount, uint256 lastUpdate, uint256 lpRewards)",
+  "function getStakedAmount(address user, bool isLP) view returns (uint256)",
+  "function ownerMint(address to, uint256 amount, bool isSents) external"
 ];
 
 const ERC20_ABI = [
@@ -56,18 +67,6 @@ const ERC20_ABI = [
   "function totalSupply() view returns (uint256)"
 ];
 
-const THE100_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address, uint256) returns (bool)",
-  ...ERC20_ABI
-];
-
-const SENTS_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function transfer(address, uint256) returns (bool)",
-  ...ERC20_ABI
-];
-
 // ==============================================
 // APPROVED ASSETS (Stablecoins only)
 // ==============================================
@@ -75,6 +74,12 @@ const MINT_TOKENS = [
   { symbol: 'DAI', name: 'Dai from Ethereum', addr: "0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals: 18 },
   { symbol: 'USDC', name: 'USDC from Ethereum', addr: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", decimals: 6 },
   { symbol: 'USDT', name: 'USDT from Ethereum', addr: "0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f", decimals: 6 },
+];
+
+const LP_TOKENS = [
+  { symbol: '100/SENTS LP', name: '100/SENTS PulseX LP', addr: LP_100_SENTS, decimals: 18 },
+  { symbol: 'DAI/100 LP', name: 'DAI/100 PulseX LP', addr: LP_DAI_100, decimals: 18 },
+  { symbol: 'DAI/SENTS LP', name: 'DAI/SENTS PulseX LP', addr: LP_DAI_SENTS, decimals: 18 },
 ];
 
 const RICH_TOKENS = [
@@ -87,15 +92,40 @@ const RICH_TOKENS = [
 ];
 
 // ==============================================
-// ROADMAP PHASES
+// PROJECT DETAILS (Enhanced explanations)
 // ==============================================
-const ROADMAP_PHASES = [
-  { id: 1, title: "Phase 1: Genesis", status: "active", icon: Radio, desc: "Preparing for launch. Security audits, community formation. We are here.", detail: "System Check: Green" },
-  { id: 2, title: "Phase 2: Ignition", status: "pending", icon: Flame, desc: "Mainnet Launch. Minting 'The 100'. SENTS Forge online.", detail: "Target: 100 Tokens" },
-  { id: 3, title: "Phase 3: Expansion", status: "pending", icon: TrendingUp, desc: "Liquidity Building on PulseX. Arbitrage stabilization.", detail: "Target: Deep Liquidity" },
-  { id: 4, title: "Phase 4: The Constant", status: "locked", icon: Hexagon, desc: "Forging a new stable asset pegged to a timeless universal constant.", detail: "Classified: Top Secret" },
-  { id: 5, title: "Phase 5: The Shift", status: "locked", icon: Rocket, desc: "24hr Protocol Pause. Liquidity migrates to decentralized baskets.", detail: "Endgame: Autonomy" }
-];
+const PROJECT_DETAILS = {
+  overview: `100SENTS is a privacy‑centric stable unit protocol built on PulseChain. 
+    It replaces the traditional dollar peg with SENTS (1 SENT = $0.01) and anchors the system around 
+    a hyper‑scarce governance token, "The 100". The protocol is designed to be fully autonomous, 
+    with no oracles or external dependencies.`,
+  vision: `We envision a future where financial sovereignty is the norm. 100SENTS enables 
+    private, peer‑to‑peer transactions with a stable unit that is not controlled by any central authority. 
+    The upcoming "Constant" phase will introduce a revolutionary backing mechanism – 
+    the first stablecoin ever to be backed by a universal constant, making it truly unstoppable.`,
+  arbitrage: `When liquidity pools launch, "The 100" will trade freely on PulseX. 
+    If the market price rises above the $1,000 minting cost, arbitrageurs can mint new "The 100" 
+    here and sell them on the DEX for a profit, simultaneously stabilising the price. 
+    This mechanism ensures that "The 100" never strays far from its fundamental value.`,
+  fees: `Every forge or unforge transaction incurs a 1% fee. 
+    This fee is split: 50% goes to stakers (both single and LP), 30% to the Reserve, 
+    and 20% to Operations (buy & burn). Stakers earn fees in the stablecoin they helped facilitate.`,
+  backing: `SENTS are always backed 1:1 by bridged Ethereum stablecoins (DAI, USDC, USDT) 
+    held in the contract. Phase 4, "The Constant", will introduce a new type of backing – 
+    a universal constant that has never been used before in DeFi. This will make SENTS 
+    the most resilient stablecoin on earth, fully independent of any fiat system.`,
+  emission: `Only 100 "The 100" tokens will ever be minted by the public. 
+    An additional 100 tokens are emitted over 10 months (10 per month) exclusively to 
+    LP stakers. After the emission period ends, the supply becomes deflationary via 
+    buy‑and‑burn mechanisms. The total maximum supply is 200.`,
+  phases: [
+    { id: 1, title: "Genesis", desc: "Smart contract deployment, security audits, and community building. The foundation is laid." },
+    { id: 2, title: "Ignition", desc: "Mainnet launch. Public minting of 'The 100' begins at $1,000 per token. SENTS forge goes live." },
+    { id: 3, title: "Expansion", desc: "Liquidity pools are created on PulseX. Arbitrageurs stabilise the peg. Staking rewards commence." },
+    { id: 4, title: "The Constant", desc: "A revolutionary shift: SENTS becomes backed by a universal constant. No more fiat dependency. zk‑integration for private transactions." },
+    { id: 5, title: "The Shift", desc: "A 24‑hour pause, after which all liquidity migrates to decentralised baskets. Full autonomy achieved." }
+  ]
+};
 
 // ==============================================
 // STYLES (Neon Yellow/Orange)
@@ -122,8 +152,10 @@ const STYLES = `
 `;
 
 // ==============================================
-// TRANSACTION MODAL COMPONENT
+// COMPONENTS
 // ==============================================
+
+// Transaction Modal
 const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   if (!isOpen) return null;
   return (
@@ -151,10 +183,8 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   );
 };
 
-// ==============================================
-// DEX CHART COMPONENT (DexScreener)
-// ==============================================
-const DexChart = ({ pairAddress }) => {
+// Dex Chart (DexScreener) – Updated to use DAI/100 pair for mint page
+const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
   const [expanded, setExpanded] = useState(false);
   
   if (expanded) {
@@ -178,65 +208,169 @@ const DexChart = ({ pairAddress }) => {
   );
 };
 
-// ==============================================
-// LANDING PAGE
-// ==============================================
-const LandingPage = ({ setActiveTab }) => (
-  <div className="view-enter max-w-6xl mx-auto px-4 py-12 text-center">
-    <h1 className="text-7xl font-black text-white mb-6 tracking-tighter">
-      100<span className="text-[var(--neon-yellow)]">SENTS</span>
-    </h1>
-    <p className="text-2xl text-gray-400 font-mono mb-12 max-w-3xl mx-auto">
-      THE FUTURE OF FINANCIAL PRIVACY
-    </p>
-    <div className="grid md:grid-cols-3 gap-6 mb-12">
-      <div className="holo-card p-6">
-        <Shield className="text-[var(--neon-yellow)] mx-auto mb-4" size={40} />
-        <h3 className="text-xl font-bold text-white mb-2">Sovereign</h3>
-        <p className="text-gray-400 text-sm">No oracles, no dependencies. Pure code.</p>
-      </div>
-      <div className="holo-card p-6">
-        <Layers className="text-[var(--neon-orange)] mx-auto mb-4" size={40} />
-        <h3 className="text-xl font-bold text-white mb-2">Scarce</h3>
-        <p className="text-gray-400 text-sm">Only 220 "The 100" will ever exist.</p>
-      </div>
-      <div className="holo-card p-6">
-        <Zap className="text-[var(--neon-yellow)] mx-auto mb-4" size={40} />
-        <h3 className="text-xl font-bold text-white mb-2">Private</h3>
-        <p className="text-gray-400 text-sm">Forge to any address. Break the link.</p>
-      </div>
-    </div>
-    <button onClick={() => setActiveTab('mint')} className="px-8 py-4 bg-[var(--neon-yellow)] text-black font-bold font-mono text-lg hover:bg-[var(--neon-orange)] transition-colors">
-      ENTER THE FORGE
-    </button>
+// Piteas Iframe
+const PiteasIframe = () => (
+  <div className="w-full h-[600px] rounded-lg overflow-hidden border border-white/10">
+    <iframe 
+      src="https://app.piteas.io" 
+      className="w-full h-full"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      title="Piteas DEX"
+    />
   </div>
 );
 
-// ==============================================
-// MINT VIEW – Stablecoins only, fixed $1000 peg
-// ==============================================
-const MintView = ({ wallet, connect, provider, updateBalances }) => {
+// Recent Transactions
+const RecentTransactions = ({ txs }) => {
+  if (!txs.length) {
+    return (
+      <div className="holo-card p-6 text-center text-gray-500 font-mono">
+        No transactions yet.
+      </div>
+    );
+  }
+  return (
+    <div className="holo-card p-4 max-h-80 overflow-y-auto">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-3 flex items-center gap-2"><History size={14} /> RECENT TRANSACTIONS</h3>
+      {txs.map((tx, i) => (
+        <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 text-xs font-mono">
+          <span className="text-gray-400">{tx.type}</span>
+          <span className="text-white">{tx.amount}</span>
+          <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--neon-yellow)] hover:underline">
+            <ExternalLink size={12} />
+          </a>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Project Info Sidebar
+const ProjectInfoSidebar = () => (
+  <div className="space-y-4">
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🌌 OVERVIEW</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.overview}</p>
+    </div>
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🔮 VISION</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.vision}</p>
+    </div>
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">📈 ARBITRAGE</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.arbitrage}</p>
+    </div>
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">💸 FEE DISTRIBUTION</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.fees}</p>
+    </div>
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">🔒 BACKING</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.backing}</p>
+    </div>
+    <div className="holo-card p-4 bg-black/50">
+      <h3 className="text-sm font-mono text-[var(--neon-yellow)] mb-2">📉 EMISSION & DEFLATION</h3>
+      <p className="text-xs text-gray-400 leading-relaxed">{PROJECT_DETAILS.emission}</p>
+    </div>
+  </div>
+);
+
+// Landing Page (Enhanced)
+const LandingPage = ({ setActiveTab }) => (
+  <div className="view-enter max-w-6xl mx-auto px-4 py-12">
+    <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+      <div>
+        <h1 className="text-7xl font-black text-white mb-4 tracking-tighter">
+          100<span className="text-[var(--neon-yellow)]">SENTS</span>
+        </h1>
+        <p className="text-2xl text-gray-400 font-mono mb-6">
+          THE FUTURE OF FINANCIAL PRIVACY
+        </p>
+        <p className="text-gray-300 mb-8 text-lg">
+          A privacy‑centric stable unit aggregator and scarcity engine on PulseChain. 
+          Escape the centralized control system.
+        </p>
+        <div className="flex gap-4">
+          <button onClick={() => setActiveTab('mint')} className="px-6 py-3 bg-[var(--neon-yellow)] text-black font-bold font-mono hover:bg-[var(--neon-orange)] transition-colors">
+            MINT 100
+          </button>
+          <button onClick={() => setActiveTab('forge')} className="px-6 py-3 border border-[var(--neon-yellow)] text-[var(--neon-yellow)] font-mono hover:bg-[var(--neon-yellow)]/10">
+            FORGE SENTS
+          </button>
+        </div>
+      </div>
+      <div className="holo-card p-6 bg-black/50">
+        <h2 className="text-xl font-mono text-white mb-4">⚡ QUICK FACTS</h2>
+        <ul className="space-y-3 text-sm text-gray-300">
+          <li>• <span className="text-[var(--neon-yellow)]">The 100</span>: Max supply 200 tokens (100 public mint + 100 emissions)</li>
+          <li>• <span className="text-[var(--neon-yellow)]">SENTS</span>: 1 SENT = $0.01, backed 1:1 by stables</li>
+          <li>• 1% fee on all forges – 50% to stakers</li>
+          <li>• LP stakers earn 10 additional 100 tokens per month (for 10 months)</li>
+          <li>• Phase 4: Backing by a universal constant – first in DeFi</li>
+          <li>• zk‑integrated privacy by default</li>
+        </ul>
+      </div>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-6 mb-16">
+      {PROJECT_DETAILS.phases.map(phase => (
+        <div key={phase.id} className="holo-card p-4 bg-black/50">
+          <div className="text-2xl font-black text-gray-700 font-mono">0{phase.id}</div>
+          <h3 className="text-lg font-bold text-[var(--neon-yellow)] mb-2">{phase.title}</h3>
+          <p className="text-xs text-gray-400">{phase.desc}</p>
+        </div>
+      ))}
+    </div>
+
+    <div className="holo-card p-8 bg-black/50 text-center max-w-3xl mx-auto">
+      <h2 className="text-2xl font-mono text-white mb-4">🔮 THE CONSTANT – A WORLD FIRST</h2>
+      <p className="text-gray-300 mb-4">
+        In Phase 4, SENTS will become the first stablecoin backed by a <span className="text-[var(--neon-yellow)]">universal constant</span> – 
+        a breakthrough that eliminates any reliance on fiat or oracles. This constant is derived from 
+        fundamental physics and mathematics, making it truly unstoppable and independent of any government 
+        or institution. Combined with zk‑proofs, every transaction becomes private and trustless.
+      </p>
+      <p className="text-sm text-gray-500 italic">
+        After the minting phases complete, "The 100" enters a deflationary era via buy‑and‑burn. 
+        How high can it go? The market will decide.
+      </p>
+    </div>
+  </div>
+);
+
+// Mint View
+const MintView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
   const [userBalance, setUserBalance] = useState('0');
+  const [rate, setRate] = useState(null);
 
   useEffect(() => {
-    const fetchBalance = async () => {
-      if (!wallet || !provider || !selectedToken) return;
+    const fetchData = async () => {
+      if (!provider || !selectedToken) return;
       try {
-        const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, provider);
-        const bal = await tokenContract.balanceOf(wallet);
-        setUserBalance(ethers.utils.formatUnits(bal, selectedToken.decimals));
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+        const r = await manager.assetRates(selectedToken.addr);
+        setRate(r);
+        if (wallet) {
+          const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, provider);
+          const bal = await tokenContract.balanceOf(wallet);
+          setUserBalance(ethers.utils.formatUnits(bal, selectedToken.decimals));
+        }
       } catch (e) {
-        setUserBalance('0');
+        console.error(e);
       }
     };
-    fetchBalance();
+    fetchData();
   }, [wallet, provider, selectedToken]);
 
   const handleMint = async () => {
     if (!wallet) return connect();
+    if (!rate || rate.isZero()) {
+      alert('Minting not enabled for this token');
+      return;
+    }
     setTxState({ open: true, status: 'approving', title: `Minting ${amount} x "100"`, step: 'Preparing...' });
 
     try {
@@ -244,8 +378,8 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, signer);
 
-      const costAmount = amount * 1000;
-      const costWei = ethers.utils.parseUnits(costAmount.toString(), selectedToken.decimals);
+      const amount100Wei = ethers.utils.parseUnits(amount.toString(), 18);
+      const costWei = amount100Wei.mul(rate).div(ethers.constants.WeiPerEther);
 
       const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
       if (allowance.lt(costWei)) {
@@ -255,17 +389,24 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
       }
 
       setTxState(s => ({ ...s, status: 'pending', step: 'Minting "The 100"...' }));
-      const mintAmountWei = ethers.utils.parseUnits(amount.toString(), 18);
-      const tx = await manager.mintThe100WithToken(selectedToken.addr, mintAmountWei);
-      await tx.wait();
+      const tx = await manager.mintThe100WithToken(selectedToken.addr, amount100Wei);
+      const receipt = await tx.wait();
 
       setTxState({ open: true, status: 'success', title: 'Mint Successful', hash: tx.hash });
+      addTransaction({
+        type: 'Mint 100',
+        amount: `${amount} 100`,
+        hash: tx.hash,
+        timestamp: Date.now()
+      });
       updateBalances();
     } catch (e) {
       console.error(e);
       setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
     }
   };
+
+  const displayCost = rate ? (parseFloat(amount) * 1000).toLocaleString() : '...';
 
   return (
     <div className="view-enter max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start px-4">
@@ -297,14 +438,15 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
             <li>Governance rights over the protocol.</li>
             <li>Earn 25% of all protocol fees via single staking.</li>
             <li>LP stakers earn an additional 120‑token emission (10 per month).</li>
-            <li>Hyper‑scarce supply – only 220 will ever exist.</li>
+            <li>Hyper‑scarce supply – only 200 will ever exist.</li>
           </ul>
           <p className="text-xs text-gray-500 mt-3 italic">
             When liquidity pools launch, price will float. Mint at $1,000 cost and sell above peg to capture arbitrage.
           </p>
         </div>
 
-        <DexChart pairAddress="0xE56043671df55dE5CDf8459710433C10324DE0aE" />
+        {/* Chart now shows DAI/100 pair as requested */}
+        <DexChart pairAddress={DAI_100_PAIR} />
       </div>
 
       <div className="holo-card p-8 bg-black/80">
@@ -344,7 +486,7 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
           <div className="flex justify-between bg-white/5 p-4 rounded">
             <span className="text-gray-400 text-xs font-mono">TOTAL COST</span>
             <span className="text-white font-mono text-xl">
-              {(1000 * amount).toLocaleString()} {selectedToken.symbol}
+              {displayCost} {selectedToken.symbol}
             </span>
           </div>
 
@@ -360,45 +502,24 @@ const MintView = ({ wallet, connect, provider, updateBalances }) => {
   );
 };
 
-// ==============================================
-// FORGE INTERFACE – Enhanced error handling, balance, percentages
-// ==============================================
-const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
-  const [mode, setMode] = useState('forge'); // 'forge' or 'unforge'
+// Forge Interface
+const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
+  const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
   const [token, setToken] = useState(MINT_TOKENS[0]);
   const [recipient, setRecipient] = useState('');
-  const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '', error: '' });
-  const [allowance, setAllowance] = useState(null);
+  const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
   const [userBalance, setUserBalance] = useState('0');
+  const [isForgeable, setIsForgeable] = useState(true);
 
-  // Fetch allowance
   useEffect(() => {
-    const fetchAllowance = async () => {
-      if (!wallet || !provider || !amount) return;
-      try {
-        const signer = provider.getSigner();
-        let tokenContract;
-        if (mode === 'forge') {
-          tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
-        } else {
-          tokenContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
-        }
-        const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
-        setAllowance(allowanceWei);
-      } catch (e) {
-        setAllowance(null);
-      }
-    };
-    fetchAllowance();
-  }, [wallet, provider, mode, token, amount]);
-
-  // Fetch user balance
-  useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchData = async () => {
       if (!wallet || !provider) return;
       try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
         if (mode === 'forge') {
+          const forgeable = await manager.isForgeAsset(token.addr);
+          setIsForgeable(forgeable);
           const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, provider);
           const bal = await tokenContract.balanceOf(wallet);
           setUserBalance(ethers.utils.formatUnits(bal, token.decimals));
@@ -408,19 +529,17 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
           setUserBalance(ethers.utils.formatUnits(bal, 18));
         }
       } catch (e) {
-        setUserBalance('0');
+        console.error(e);
       }
     };
-    fetchBalance();
+    fetchData();
   }, [wallet, provider, mode, token]);
 
   const handleForge = async () => {
     if (!wallet) return connect();
-    if (!amount || parseFloat(amount) <= 0) {
-      alert('Enter a valid amount');
-      return;
-    }
-    setTxState({ open: true, status: 'approving', title: mode === 'forge' ? 'FORGE SENTS' : 'UNFORGE SENTS', step: 'Preparing...' });
+    if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    if (mode === 'forge' && !isForgeable) return alert('Token not enabled for forging');
+    setTxState({ open: true, status: 'approving', title: mode === 'forge' ? 'FORGE SENTS' : 'UNFORGE SENTS' });
 
     try {
       const signer = provider.getSigner();
@@ -430,46 +549,36 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
       if (mode === 'forge') {
         const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
         const valWei = ethers.utils.parseUnits(amount, token.decimals);
-
-        const isForge = await manager.isForgeAsset(token.addr);
-        if (!isForge) throw new Error('Token not enabled for forging');
-
         const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
         if (allowance.lt(valWei)) {
           setTxState(s => ({ ...s, status: 'pending', step: 'Approving Stablecoin...' }));
           const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
           await txApp.wait();
         }
-
         setTxState(s => ({ ...s, status: 'pending', step: 'Forging SENTS...' }));
         const tx = await manager.forgeSents(token.addr, valWei, targetRecipient);
         await tx.wait();
         setTxState({ open: true, status: 'success', title: 'Forge Complete', hash: tx.hash });
+        addTransaction({ type: 'Forge SENTS', amount: `${amount} ${token.symbol} → SENTS`, hash: tx.hash, timestamp: Date.now() });
       } else {
         const sentsContract = new ethers.Contract(SENTS_ADDRESS, ERC20_ABI, signer);
         const sentsWei = ethers.utils.parseUnits(amount, 18);
-
         const allowance = await sentsContract.allowance(wallet, MANAGER_ADDRESS);
         if (allowance.lt(sentsWei)) {
           setTxState(s => ({ ...s, step: 'Approving SENTS...' }));
           const txApp = await sentsContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
           await txApp.wait();
         }
-
         setTxState(s => ({ ...s, status: 'pending', step: 'Unforging...' }));
         const tx = await manager.unforgeSents(token.addr, sentsWei, targetRecipient);
         await tx.wait();
         setTxState({ open: true, status: 'success', title: 'Unforge Complete', hash: tx.hash });
+        addTransaction({ type: 'Unforge SENTS', amount: `${amount} SENTS → ${token.symbol}`, hash: tx.hash, timestamp: Date.now() });
       }
       updateBalances();
     } catch (e) {
       console.error(e);
-      setTxState({
-        open: true,
-        status: 'error',
-        title: 'Transaction Failed',
-        step: e.reason || e.message || 'Unknown error',
-      });
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
     }
   };
 
@@ -537,19 +646,14 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
               )}
             </div>
             <div className="flex justify-between mt-2 text-xs">
-              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(4)} {mode === 'forge' ? token.symbol : 'SENTS'}</span>
+              <span className="text-gray-500">Balance: {parseFloat(userBalance).toFixed(6)} {mode === 'forge' ? token.symbol : 'SENTS'}</span>
               <div className="flex gap-2">
-                <button onClick={() => setAmount((userBalance * 0.25).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
-                <button onClick={() => setAmount((userBalance * 0.5).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
-                <button onClick={() => setAmount((userBalance * 0.75).toFixed(mode === 'forge' ? token.decimals : 2))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
+                <button onClick={() => setAmount((userBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
+                <button onClick={() => setAmount((userBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
+                <button onClick={() => setAmount((userBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
                 <button onClick={() => setAmount(userBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
               </div>
             </div>
-            {allowance && amount && mode === 'forge' && (
-              <div className="text-xs text-gray-500 mt-2 font-mono">
-                Allowance: {ethers.utils.formatUnits(allowance, token.decimals)} {token.symbol}
-              </div>
-            )}
           </div>
 
           <div className="flex justify-center">
@@ -606,11 +710,9 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances }) => {
   );
 };
 
-// ==============================================
-// YIELD VIEW – Full staking analytics
-// ==============================================
-const YieldView = ({ wallet, connect, provider, updateBalances }) => {
-  const [stakeType, setStakeType] = useState('single'); // 'single' or 'lp'
+// Yield View (Staking) – Updated with correct LP token address
+const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
+  const [stakeType, setStakeType] = useState('single');
   const [amount, setAmount] = useState('');
   const [txState, setTxState] = useState({ open: false, status: 'idle' });
   const [userStake, setUserStake] = useState('0');
@@ -620,8 +722,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
   const [pendingLp, setPendingLp] = useState('0');
   const [stablecoins, setStablecoins] = useState([]);
   const [decimalsMap, setDecimalsMap] = useState({});
-  const [feeRates, setFeeRates] = useState({});
-  const [lastUpdate, setLastUpdate] = useState(Date.now());
   const [stakeBalance, setStakeBalance] = useState('0');
 
   // Fetch stake token balance (100 or LP)
@@ -629,7 +729,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
     const fetchStakeBalance = async () => {
       if (!wallet || !provider) return;
       try {
-        const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : '0x0000000000000000000000000000000000000000'; // Replace with real LP address
+        const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : LP_100_SENTS;
         const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
         const bal = await tokenContract.balanceOf(wallet);
         setStakeBalance(ethers.utils.formatUnits(bal, 18));
@@ -647,15 +747,13 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
 
-      const userStakeWei = stakeType === 'single'
-        ? (await manager.singleStakes(wallet)).amount
-        : (await manager.lpStakes(wallet)).amount;
-      setUserStake(ethers.utils.formatUnits(userStakeWei, 18));
+      const userStakeWei = await manager.getStakedAmount(wallet, stakeType === 'lp');
+      setUserStake(userStakeWei.toString());
 
       const totalStakeWei = stakeType === 'single'
         ? await manager.totalSingleStake()
         : await manager.totalLpStake();
-      setTotalStake(ethers.utils.formatUnits(totalStakeWei, 18));
+      setTotalStake(totalStakeWei.toString());
 
       const share = totalStakeWei.isZero() ? 0 : userStakeWei.mul(10000).div(totalStakeWei).toNumber() / 100;
       setUserShare(share);
@@ -677,35 +775,13 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       const fees = {};
       for (let addr of stableList) {
         const pending = await manager.pendingFeeRewards(wallet, stakeType === 'lp', addr);
-        fees[addr] = ethers.utils.formatUnits(pending, decimals[addr] || 18);
+        fees[addr] = pending.toString();
       }
       setPendingFees(fees);
 
       if (stakeType === 'lp') {
         const lpReward = await manager.pendingLpReward(wallet);
-        setPendingLp(ethers.utils.formatUnits(lpReward, 18));
-      }
-
-      const now = Date.now();
-      const timeDiffSeconds = (now - lastUpdate) / 1000;
-      if (timeDiffSeconds > 5 && lastUpdate !== Date.now()) {
-        const newFeeRates = {};
-        for (let addr of stableList) {
-          const currentRpt = await manager.feeRewardPerTokenStored(addr);
-          const prevRpt = feeRates[addr]?.rpt || ethers.BigNumber.from(0);
-          if (prevRpt.gt(0) && currentRpt.gt(prevRpt) && timeDiffSeconds > 0) {
-            const increase = currentRpt.sub(prevRpt);
-            const perSecond = increase.mul(ethers.constants.WeiPerEther).div(ethers.BigNumber.from(Math.floor(timeDiffSeconds * 1e18)));
-            newFeeRates[addr] = {
-              rpt: currentRpt,
-              annualPerToken: perSecond.mul(365 * 24 * 3600).div(ethers.constants.WeiPerEther),
-            };
-          } else {
-            newFeeRates[addr] = { rpt: currentRpt, annualPerToken: ethers.BigNumber.from(0) };
-          }
-        }
-        setFeeRates(newFeeRates);
-        setLastUpdate(now);
+        setPendingLp(lpReward.toString());
       }
     } catch (e) {
       console.error(e);
@@ -726,8 +802,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
-      const lpTokenAddress = '0x0000000000000000000000000000000000000000'; // Replace later
-      const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : lpTokenAddress;
+      const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : LP_100_SENTS;
       const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
       const stakeWei = ethers.utils.parseUnits(amount, 18);
 
@@ -743,6 +818,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       await tx.wait();
 
       setTxState({ open: true, status: 'success', title: 'Stake Successful', hash: tx.hash });
+      addTransaction({ type: stakeType === 'single' ? 'Stake 100' : 'Stake LP', amount: `${amount} tokens`, hash: tx.hash, timestamp: Date.now() });
       updateBalances();
       fetchData();
     } catch (e) {
@@ -766,6 +842,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       await tx.wait();
 
       setTxState({ open: true, status: 'success', title: 'Unstake Successful', hash: tx.hash });
+      addTransaction({ type: stakeType === 'single' ? 'Unstake 100' : 'Unstake LP', amount: `${amount} tokens`, hash: tx.hash, timestamp: Date.now() });
       updateBalances();
       fetchData();
     } catch (e) {
@@ -784,6 +861,7 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       const tx = await manager.claimFees(stakeType === 'lp');
       await tx.wait();
       setTxState({ open: true, status: 'success', title: 'Fees Claimed', hash: tx.hash });
+      addTransaction({ type: 'Claim Fees', amount: 'all', hash: tx.hash, timestamp: Date.now() });
       fetchData();
     } catch (e) {
       console.error(e);
@@ -801,10 +879,19 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
       const tx = await manager.claimLpReward();
       await tx.wait();
       setTxState({ open: true, status: 'success', title: 'LP Rewards Claimed', hash: tx.hash });
+      addTransaction({ type: 'Claim LP Rewards', amount: 'all', hash: tx.hash, timestamp: Date.now() });
       fetchData();
     } catch (e) {
       console.error(e);
       setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const formatFull = (val, decimals = 18) => {
+    try {
+      return ethers.utils.formatUnits(val, decimals);
+    } catch {
+      return val;
     }
   };
 
@@ -833,22 +920,21 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
         </button>
       </div>
 
-      {/* Staking Analytics Panel */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         <div className="holo-card p-6 bg-black/50">
           <h3 className="text-lg font-mono text-white mb-4">YOUR POSITION</h3>
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-gray-400 text-sm">Staked</span>
-              <span className="text-white font-mono">{parseFloat(userStake).toFixed(4)}</span>
+              <span className="text-white font-mono">{formatFull(userStake, 18)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400 text-sm">Total Pool</span>
-              <span className="text-white font-mono">{parseFloat(totalStake).toFixed(4)}</span>
+              <span className="text-white font-mono">{formatFull(totalStake, 18)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400 text-sm">Your Share</span>
-              <span className="text-[var(--neon-yellow)] font-mono">{userShare.toFixed(2)}%</span>
+              <span className="text-[var(--neon-yellow)] font-mono">{userShare.toFixed(4)}%</span>
             </div>
           </div>
         </div>
@@ -861,14 +947,14 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
               return (
                 <div key={addr} className="flex justify-between text-sm">
                   <span className="text-gray-400">{symbol}</span>
-                  <span className="text-white font-mono">{pendingFees[addr] || '0'}</span>
+                  <span className="text-white font-mono">{formatFull(pendingFees[addr] || '0', decimalsMap[addr] || 18)}</span>
                 </div>
               );
             })}
             {stakeType === 'lp' && (
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--neon-yellow)]">100 EMISSION</span>
-                <span className="text-white font-mono">{pendingLp}</span>
+                <span className="text-white font-mono">{formatFull(pendingLp, 18)}</span>
               </div>
             )}
           </div>
@@ -878,32 +964,28 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
           <h3 className="text-lg font-mono text-white mb-4">PROJECTED REWARDS</h3>
           {userShare > 0 && (
             <div className="space-y-2 text-sm">
-              {stablecoins.map((addr) => {
-                const ratePerToken = feeRates[addr]?.annualPerToken;
-                if (!ratePerToken || ratePerToken.isZero()) return null;
-                const userStakeWei = ethers.utils.parseUnits(userStake, 18);
-                const annualRewardWei = userStakeWei.mul(ratePerToken).div(ethers.constants.WeiPerEther);
-                const annualReward = ethers.utils.formatUnits(annualRewardWei, decimalsMap[addr] || 18);
-                const symbol = MINT_TOKENS.find((t) => t.addr.toLowerCase() === addr.toLowerCase())?.symbol || addr.slice(0, 6);
-                return (
-                  <div key={addr} className="flex justify-between">
-                    <span className="text-gray-400">{symbol}/year</span>
-                    <span className="text-white font-mono">{parseFloat(annualReward).toFixed(2)}</span>
-                  </div>
-                );
-              })}
+              <p className="text-gray-500 italic">Based on current pool share</p>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Est. daily fees</span>
+                <span className="text-white font-mono">--</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Est. weekly fees</span>
+                <span className="text-white font-mono">--</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Est. monthly fees</span>
+                <span className="text-white font-mono">--</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Est. yearly fees</span>
+                <span className="text-white font-mono">--</span>
+              </div>
               {stakeType === 'lp' && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">100/year</span>
-                  <span className="text-white font-mono">
-                    {userShare > 0 ? ((userShare / 100) * 120).toFixed(2) : '0'} (est.)
-                  </span>
+                  <span className="text-white font-mono">{(userShare / 100 * 120).toFixed(4)}</span>
                 </div>
-              )}
-              {Object.keys(feeRates).length === 0 && (
-                <p className="text-gray-500 italic text-xs">
-                  Fee rate accumulating... check back soon.
-                </p>
               )}
             </div>
           )}
@@ -911,12 +993,11 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
             <p className="text-gray-500 italic text-xs">Stake to see projections.</p>
           )}
           <p className="text-xs text-gray-600 mt-3 border-t border-white/10 pt-2">
-            * APY estimates based on recent fee accrual. Actual yields vary.
+            * APY estimates coming soon with indexer.
           </p>
         </div>
       </div>
 
-      {/* Stake/Unstake Controls */}
       <div className="holo-card p-8 bg-black/50 max-w-2xl mx-auto">
         <h3 className="text-xl font-mono mb-4" style={{ color: stakeType === 'single' ? 'var(--neon-yellow)' : 'var(--neon-orange)' }}>
           {stakeType === 'single' ? 'SINGLE STAKE' : 'LP STAKE'}
@@ -932,11 +1013,11 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
               className="w-full bg-[#111] border border-white/10 p-3 text-white font-mono outline-none"
             />
             <div className="flex justify-between mt-2 text-xs">
-              <span className="text-gray-500">Balance: {parseFloat(stakeBalance).toFixed(4)} {stakeType === 'single' ? '100' : 'LP'}</span>
+              <span className="text-gray-500">Balance: {parseFloat(stakeBalance).toFixed(6)} {stakeType === 'single' ? '100' : 'LP'}</span>
               <div className="flex gap-2">
-                <button onClick={() => setAmount((stakeBalance * 0.25).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
-                <button onClick={() => setAmount((stakeBalance * 0.5).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
-                <button onClick={() => setAmount((stakeBalance * 0.75).toFixed(4))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.25).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">25%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.5).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">50%</button>
+                <button onClick={() => setAmount((stakeBalance * 0.75).toFixed(6))} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">75%</button>
                 <button onClick={() => setAmount(stakeBalance)} className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded">MAX</button>
               </div>
             </div>
@@ -977,16 +1058,14 @@ const YieldView = ({ wallet, connect, provider, updateBalances }) => {
   );
 };
 
-// ==============================================
-// WALLET VIEW
-// ==============================================
+// Wallet View
 const WalletView = ({ wallet, balances }) => (
   <div className="view-enter max-w-4xl mx-auto px-4">
      <div className="holo-card p-6 mb-6">
         <div className="text-xs text-gray-500 font-mono mb-1">CONNECTED ADDRESS</div>
-        <div className="text-lg text-[var(--neon-yellow)] font-mono">{wallet || 'Not Connected'}</div>
+        <div className="text-lg text-[var(--neon-yellow)] font-mono break-all">{wallet || 'Not Connected'}</div>
      </div>
-     <div className="grid gap-3">
+     <div className="grid gap-3 max-h-96 overflow-y-auto">
         {balances.map((b, i) => (
            <div key={i} className="bg-[#111] border border-white/5 p-4 rounded flex justify-between items-center hover:border-white/20 transition-colors">
               <span className="text-white font-bold">{b.symbol}</span>
@@ -997,17 +1076,15 @@ const WalletView = ({ wallet, balances }) => (
   </div>
 );
 
-// ==============================================
-// TRAJECTORY VIEW (Roadmap)
-// ==============================================
+// Trajectory View (Roadmap)
 const TrajectoryView = () => (
   <div className="view-enter max-w-4xl mx-auto space-y-4 pb-20">
      <h2 className="text-4xl font-bold text-white text-center mb-12">TRAJECTORY</h2>
-     {ROADMAP_PHASES.map(p => (
+     {PROJECT_DETAILS.phases.map(p => (
         <div key={p.id} className="holo-card p-6 flex gap-4 items-center hover:bg-white/5 transition-colors">
            <div className="text-4xl font-black text-gray-800 font-mono">0{p.id}</div>
            <div>
-              <h3 className={`font-bold uppercase ${p.status === 'active' ? 'text-[var(--neon-yellow)]' : 'text-white'}`}>{p.title}</h3>
+              <h3 className={`font-bold uppercase text-[var(--neon-yellow)]`}>{p.title}</h3>
               <p className="text-sm text-gray-500 font-mono">{p.desc}</p>
            </div>
         </div>
@@ -1024,6 +1101,7 @@ const App = () => {
   const [balances, setBalances] = useState([]);
   const [provider, setProvider] = useState(null);
   const [rampOpen, setRampOpen] = useState(false);
+  const [transactions, setTransactions] = useState([]);
 
   // Initialize provider
   useEffect(() => {
@@ -1033,23 +1111,28 @@ const App = () => {
     }
   }, []);
 
-  // Load saved wallet from localStorage
+  // Load saved wallet and transactions from localStorage
   useEffect(() => {
     const savedWallet = localStorage.getItem('100sents_wallet');
     if (savedWallet && provider) {
       setWallet(savedWallet);
       updateBalances();
     }
+    const savedTxs = localStorage.getItem('100sents_txs');
+    if (savedTxs) {
+      setTransactions(JSON.parse(savedTxs));
+    }
   }, [provider]);
 
-  // Save wallet to localStorage when it changes
+  // Save wallet and transactions when they change
   useEffect(() => {
-    if (wallet) {
-      localStorage.setItem('100sents_wallet', wallet);
-    } else {
-      localStorage.removeItem('100sents_wallet');
-    }
+    if (wallet) localStorage.setItem('100sents_wallet', wallet);
+    else localStorage.removeItem('100sents_wallet');
   }, [wallet]);
+
+  useEffect(() => {
+    localStorage.setItem('100sents_txs', JSON.stringify(transactions));
+  }, [transactions]);
 
   // Listen for account/chain changes
   useEffect(() => {
@@ -1080,6 +1163,7 @@ const App = () => {
       { symbol: '100', addr: TOKEN_100_ADDRESS, dec: 18 },
       { symbol: 'SENTS', addr: SENTS_ADDRESS, dec: 18 },
       ...MINT_TOKENS,
+      ...LP_TOKENS,
       ...RICH_TOKENS
     ];
 
@@ -1102,7 +1186,6 @@ const App = () => {
          const accounts = await provider.listAccounts();
          setWallet(accounts[0]);
          
-         // Switch to PulseChain
          try {
            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: PULSECHAIN_CHAIN_ID }] });
          } catch(e) {
@@ -1124,6 +1207,10 @@ const App = () => {
     } else { alert("Install MetaMask"); }
   };
 
+  const addTransaction = (tx) => {
+    setTransactions(prev => [tx, ...prev].slice(0, 20));
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-gray-200 font-sans selection:bg-[var(--neon-yellow)]/30 overflow-x-hidden">
       <style>{STYLES}</style>
@@ -1142,14 +1229,14 @@ const App = () => {
               { id: 'mint', label: 'MINT 100', icon: Hourglass },
               { id: 'forge', label: 'FORGE', icon: Box }, 
               { id: 'yield', label: 'YIELD', icon: Zap },
-              { id: 'trajectory', label: 'TRAJECTORY', icon: Map }
+              { id: 'trajectory', label: 'TRAJECTORY', icon: Map },
+              { id: 'swap', label: 'SWAP', icon: Repeat }
             ].map((tab) => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-2 rounded-full text-[10px] font-bold font-mono uppercase transition-all ${activeTab === tab.id ? 'bg-[var(--neon-yellow)] text-black' : 'text-gray-500 hover:text-white'}`}>
                 {tab.label}
               </button>
             ))}
             
-            {/* On/Off Ramp Dropdown */}
             <div className="relative">
                <button onClick={() => setRampOpen(!rampOpen)} className="px-4 py-2 text-[10px] font-bold font-mono uppercase text-gray-500 hover:text-white flex items-center gap-1">
                   ON/OFF RAMP <ChevronDown size={12}/>
@@ -1173,12 +1260,34 @@ const App = () => {
           </button>
         </header>
 
-        {activeTab === 'landing' && <LandingPage setActiveTab={setActiveTab} />}
-        {activeTab === 'mint' && <MintView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} />}
-        {activeTab === 'forge' && <ForgeInterface wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} />}
-        {activeTab === 'yield' && <YieldView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} />}
-        {activeTab === 'trajectory' && <TrajectoryView />}
-        {activeTab === 'wallet' && <WalletView wallet={wallet} balances={balances} />}
+        <div className="max-w-7xl mx-auto">
+          {activeTab === 'landing' && <LandingPage setActiveTab={setActiveTab} />}
+          
+          {['mint', 'forge', 'yield'].includes(activeTab) && (
+            <div className="grid lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-3">
+                {activeTab === 'mint' && <MintView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+                {activeTab === 'forge' && <ForgeInterface wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+                {activeTab === 'yield' && <YieldView wallet={wallet} connect={connect} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+              </div>
+              <div className="lg:col-span-1 space-y-4">
+                <RecentTransactions txs={transactions} />
+                <ProjectInfoSidebar />
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'trajectory' && <TrajectoryView />}
+          
+          {activeTab === 'swap' && (
+            <div className="view-enter">
+              <h2 className="text-3xl font-bold text-white text-center mb-6">PITEAS DEX</h2>
+              <PiteasIframe />
+            </div>
+          )}
+          
+          {activeTab === 'wallet' && <WalletView wallet={wallet} balances={balances} />}
+        </div>
       </div>
     </div>
   );
