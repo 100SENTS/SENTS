@@ -10,7 +10,7 @@ import {
   ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock,
   History, Repeat, Sun, Moon, Palette, Send, ShoppingCart,
   CreditCard, Repeat as SwapIcon, Menu, X as CloseIcon,
-  Copy, PlusCircle, LogIn
+  Copy, PlusCircle, LogIn, Twitter, Send as Telegram, Youtube
 } from 'lucide-react';
 
 // ==============================================
@@ -25,8 +25,10 @@ const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F";
 const LP_100_DAI = "0x22914141b821e394804d767185909901FdA2efb0";
 const LP_SENTS_DAI = "0xda7772F53f4112E8537690cb37907d51C17b3630";
 
-// DEX Pair for Chart (The 100/DAI)
-const DAI_100_PAIR = "0x22914141b821e394804d767185909901FdA2efb0";
+// DEX Pair for Charts (Analytics page)
+const DAI_100_PAIR = LP_100_DAI;
+const DAI_SENTS_PAIR = LP_SENTS_DAI;
+const SENTS_100_PAIR = LP_100_SENTS;
 
 const PULSECHAIN_CHAIN_ID = '0x171'; // 369
 const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
@@ -35,6 +37,13 @@ const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
 const RAMP_LINKS = {
   provex: "https://app.provex.com",
   peer: "https://peer.xyz"
+};
+
+// Social Links
+const SOCIAL_LINKS = {
+  twitter: "https://x.com/100SENTS",
+  telegram: "https://t.me/SENTS100",
+  youtube: "https://www.youtube.com/@100SENTS"
 };
 
 // ==============================================
@@ -76,6 +85,12 @@ const ERC20_ABI = [
   "function totalSupply() view returns (uint256)"
 ];
 
+// The100Token ABI with totalMinted
+const THE100_ABI = [
+  ...ERC20_ABI,
+  "function totalMinted() view returns (uint256)"
+];
+
 // ==============================================
 // APPROVED ASSETS
 // ==============================================
@@ -101,7 +116,7 @@ const RICH_TOKENS = [
 ];
 
 // ==============================================
-// THEMES
+// THEMES (unchanged)
 // ==============================================
 const THEMES = {
   dark: {
@@ -217,7 +232,7 @@ const THEMES = {
 };
 
 // ==============================================
-// PROJECT DETAILS
+// PROJECT DETAILS (unchanged)
 // ==============================================
 const PROJECT_DETAILS = {
   overview: `100SENTS is a privacy‑centric stable unit protocol built on PulseChain. 
@@ -253,7 +268,7 @@ const PROJECT_DETAILS = {
 };
 
 // ==============================================
-// STYLES (with grid and flow animation)
+// STYLES (with flow animation)
 // ==============================================
 const baseStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
@@ -415,7 +430,7 @@ const CopyableAddress = ({ address, symbol, showSymbol = true }) => {
 // COMPONENTS
 // ==============================================
 
-// Transaction Modal
+// Transaction Modal (unchanged)
 const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   if (!isOpen) return null;
   return (
@@ -443,32 +458,7 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   );
 };
 
-// Dex Chart
-const DexChart = ({ pairAddress = DAI_100_PAIR }) => {
-  const [expanded, setExpanded] = useState(false);
-  
-  if (expanded) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
-        <div className="flex justify-end mb-2">
-          <button onClick={() => setExpanded(false)} className="text-white flex items-center gap-2 font-mono hover:text-[var(--accent-primary)]"><Minimize2 size={16}/> CLOSE VIEW</button>
-        </div>
-        <iframe src={`https://dexscreener.com/pulsechain/${pairAddress}?embed=1&theme=dark`} className="w-full h-full border-0 rounded-lg"></iframe>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="w-full h-96 border border-[var(--border)] bg-[var(--bg-secondary)] rounded-xl overflow-hidden relative group">
-      <button onClick={() => setExpanded(true)} className="absolute top-2 right-2 bg-black/80 p-2 text-gray-400 hover:text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <Maximize2 size={16} />
-      </button>
-      <iframe src={`https://dexscreener.com/pulsechain/${pairAddress}?embed=1&theme=dark&info=0`} className="w-full h-full border-0"></iframe>
-    </div>
-  );
-};
-
-// Piteas Iframe
+// Piteas Iframe (unchanged)
 const PiteasIframe = ({ onClose }) => (
   <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
     <div className="flex justify-end mb-2">
@@ -478,7 +468,7 @@ const PiteasIframe = ({ onClose }) => (
   </div>
 );
 
-// Theme Switcher
+// Theme Switcher (unchanged)
 const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const themeNames = Object.keys(THEMES);
@@ -513,7 +503,7 @@ const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   );
 };
 
-// Flow Animation Component
+// Flow Animation Component (unchanged)
 const FlowAnimation = () => (
   <div className="holo-card p-8 max-w-4xl mx-auto">
     <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
@@ -551,7 +541,42 @@ const FlowAnimation = () => (
   </div>
 );
 
-// Landing Page
+// Footer with Social Links
+const Footer = () => (
+  <footer className="mt-16 py-8 border-t border-[var(--border)]">
+    <div className="flex justify-center gap-8">
+      <a
+        href={SOCIAL_LINKS.twitter}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
+      >
+        <Twitter size={24} />
+      </a>
+      <a
+        href={SOCIAL_LINKS.telegram}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
+      >
+        <Telegram size={24} />
+      </a>
+      <a
+        href={SOCIAL_LINKS.youtube}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
+      >
+        <Youtube size={24} />
+      </a>
+    </div>
+    <p className="text-center text-xs text-[var(--text-secondary)] mt-4">
+      © 2024 100SENTS. All rights reserved.
+    </p>
+  </footer>
+);
+
+// Landing Page (unchanged, but with Footer added inside)
 const LandingPage = ({ setActiveTab }) => (
   <div className="view-enter max-w-6xl mx-auto px-4 py-12 space-y-16">
     <div className="text-center">
@@ -633,16 +658,19 @@ const LandingPage = ({ setActiveTab }) => (
         How high can it go? The market will decide.
       </p>
     </div>
+    <Footer />
   </div>
 );
 
-// Mint View
+// Mint View (with counter, without DexChart)
 const MintView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
   const [userBalance, setUserBalance] = useState('0');
   const [rate, setRate] = useState(null);
+  const [totalMinted, setTotalMinted] = useState(0);
+  const MAX_SUPPLY = 200;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -656,6 +684,10 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
           const bal = await tokenContract.balanceOf(wallet);
           setUserBalance(ethers.utils.formatUnits(bal, selectedToken.decimals));
         }
+        // Fetch total minted 100 tokens
+        const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
+        const minted = await token100.totalMinted();
+        setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
       } catch (e) {
         console.error(e);
       }
@@ -665,7 +697,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
 
   const handleMint = async () => {
     if (!wallet) {
-      connect(); // This will open the wallet connector modal
+      connect();
       return;
     }
     if (!rate || rate.isZero()) {
@@ -701,6 +733,10 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
         timestamp: Date.now()
       });
       updateBalances();
+      // Update minted count
+      const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
+      const minted = await token100.totalMinted();
+      setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
     } catch (e) {
       console.error(e);
       setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
@@ -708,6 +744,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   };
 
   const displayCost = rate ? (parseFloat(amount) * 1000).toLocaleString() : '...';
+  const remaining = Math.max(0, MAX_SUPPLY - totalMinted);
 
   return (
     <div className="view-enter max-w-6xl mx-auto px-4 py-8">
@@ -719,6 +756,13 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
             MINT 100.<br />
             <span className="text-[var(--accent-primary)]">BUILD SENTS.</span>
           </h1>
+
+          {/* Mint Counter */}
+          <div className="holo-card p-4 text-center">
+            <div className="text-sm text-[var(--text-secondary)]">100 TOKENS REMAINING</div>
+            <div className="text-4xl font-bold text-[var(--accent-primary)]">{remaining}</div>
+            <div className="text-xs text-[var(--text-secondary)]">out of {MAX_SUPPLY} total supply</div>
+          </div>
 
           <div className="holo-card p-6 border-l-4 border-[var(--accent-primary)]">
             <h3 className="text-lg font-bold text-[var(--accent-primary)] font-mono mb-2 flex items-center gap-2">
@@ -757,8 +801,6 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
               This creates a natural price floor and ceiling, ensuring "The 100" remains closely pegged to its fundamental value.
             </p>
           </div>
-
-          <DexChart pairAddress={DAI_100_PAIR} />
         </div>
 
         <div className="holo-card p-8 bg-[var(--bg-secondary)]">
@@ -814,11 +856,12 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
 
-// Forge Interface
+// Forge Interface (with TVL in sidebar)
 const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
@@ -827,6 +870,7 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
   const [txState, setTxState] = useState({ open: false, status: 'idle', title: '', step: '' });
   const [userBalance, setUserBalance] = useState('0');
   const [isForgeable, setIsForgeable] = useState(true);
+  const [forgeTVL, setForgeTVL] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -844,6 +888,15 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
           const bal = await sentsContract.balanceOf(wallet);
           setUserBalance(ethers.utils.formatUnits(bal, 18));
         }
+
+        // Fetch Forge TVL (total stablecoin reserves)
+        let tvl = 0;
+        for (const stable of MINT_TOKENS) {
+          const tokenContract = new ethers.Contract(stable.addr, ERC20_ABI, provider);
+          const balance = await tokenContract.balanceOf(MANAGER_ADDRESS);
+          tvl += parseFloat(ethers.utils.formatUnits(balance, stable.decimals));
+        }
+        setForgeTVL(tvl);
       } catch (e) {
         console.error(e);
       }
@@ -1059,19 +1112,26 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
             <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔒 BACKING</h3>
             <p className="text-sm text-[var(--text-secondary)]">{PROJECT_DETAILS.backing}</p>
           </div>
+          <div className="holo-card p-6">
+            <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">💰 FORGE TVL</h3>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">${forgeTVL.toFixed(2)}</p>
+            <p className="text-xs text-[var(--text-secondary)]">Total stablecoin reserves</p>
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
 
-// Yield View
+// Yield View (with TVL displays)
 const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [stakeType, setStakeType] = useState('single');
   const [amount, setAmount] = useState('');
   const [txState, setTxState] = useState({ open: false, status: 'idle' });
   const [userStake, setUserStake] = useState('0');
-  const [totalStake, setTotalStake] = useState('0');
+  const [totalSingleStake, setTotalSingleStake] = useState('0');
+  const [totalLpStake, setTotalLpStake] = useState('0');
   const [userShare, setUserShare] = useState(0);
   const [pendingFees, setPendingFees] = useState({});
   const [pendingLp, setPendingLp] = useState('0');
@@ -1127,11 +1187,12 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
       const userStakeWei = await manager.getStakedAmount(wallet, stakeType === 'lp');
       setUserStake(userStakeWei.toString());
 
-      const totalStakeWei = stakeType === 'single'
-        ? await manager.totalSingleStake()
-        : await manager.totalLpStake();
-      setTotalStake(totalStakeWei.toString());
+      const totalSingleWei = await manager.totalSingleStake();
+      const totalLpWei = await manager.totalLpStake();
+      setTotalSingleStake(ethers.utils.formatUnits(totalSingleWei, 18));
+      setTotalLpStake(ethers.utils.formatUnits(totalLpWei, 18));
 
+      const totalStakeWei = stakeType === 'single' ? totalSingleWei : totalLpWei;
       const share = totalStakeWei.isZero() ? 0 : userStakeWei.mul(10000).div(totalStakeWei).toNumber() / 100;
       setUserShare(share);
 
@@ -1335,6 +1396,18 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
         </button>
       </div>
 
+      {/* TVL Cards */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">Single Stake TVL</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalSingleStake).toFixed(2)} 100</p>
+        </div>
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">LP Stake TVL</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalLpStake).toFixed(2)} LP</p>
+        </div>
+      </div>
+
       {stakeType === 'single' && (
         <div className="grid grid-cols-3 gap-4 mb-4 text-xs font-mono max-w-2xl mx-auto">
           <div className="holo-card p-2 bg-[var(--bg-primary)]">
@@ -1359,10 +1432,6 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)] text-sm">Staked</span>
               <span className="text-[var(--text-primary)] font-mono">{formatFull(userStake, 18)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[var(--text-secondary)] text-sm">Total Pool</span>
-              <span className="text-[var(--text-primary)] font-mono">{formatFull(totalStake, 18)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[var(--text-secondary)] text-sm">Your Share</span>
@@ -1481,11 +1550,12 @@ const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
 
-// Custom Token Modal
+// Custom Token Modal (unchanged)
 const AddTokenModal = ({ isOpen, onClose, onAdd }) => {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1542,7 +1612,7 @@ const AddTokenModal = ({ isOpen, onClose, onAdd }) => {
   );
 };
 
-// Transaction History with tabs
+// Transaction History with tabs (unchanged)
 const TransactionHistory = ({ txs }) => {
   const [view, setView] = useState('recent');
   
@@ -1592,7 +1662,7 @@ const TransactionHistory = ({ txs }) => {
   );
 };
 
-// NEW: Wallet Connector Modal (inspired by Internet Money wallet)
+// Wallet Connector Modal (unchanged)
 const WalletConnector = ({ isOpen, onClose, onConnect }) => {
   const walletOptions = [
     { id: 'metamask', name: 'MetaMask', icon: '🦊' },
@@ -1643,7 +1713,7 @@ const WalletConnector = ({ isOpen, onClose, onConnect }) => {
   );
 };
 
-// Wallet View (enhanced)
+// Wallet View (enhanced) – unchanged
 const WalletView = ({ wallet, balances, transactions, onBuy, onSell, onRefresh, onAddCustomToken }) => {
   const [showSwap, setShowSwap] = useState(false);
   const [showAddToken, setShowAddToken] = useState(false);
@@ -1718,11 +1788,12 @@ const WalletView = ({ wallet, balances, transactions, onBuy, onSell, onRefresh, 
           <TransactionHistory txs={transactions} />
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
 
-// Trajectory View
+// Trajectory View (unchanged)
 const TrajectoryView = () => (
   <div className="view-enter max-w-4xl mx-auto px-4 py-8 space-y-4">
      <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-12">TRAJECTORY</h2>
@@ -1735,8 +1806,124 @@ const TrajectoryView = () => (
            </div>
         </div>
      ))}
+    <Footer />
   </div>
 );
+
+// New Analytics View
+const AnalyticsView = ({ provider }) => {
+  const [forgeTVL, setForgeTVL] = useState(0);
+  const [totalSingleStake, setTotalSingleStake] = useState('0');
+  const [totalLpStake, setTotalLpStake] = useState('0');
+  const [totalMinted, setTotalMinted] = useState(0);
+  const MAX_SUPPLY = 200;
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!provider) return;
+      try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+
+        // Forge TVL
+        let tvl = 0;
+        for (const stable of MINT_TOKENS) {
+          const tokenContract = new ethers.Contract(stable.addr, ERC20_ABI, provider);
+          const balance = await tokenContract.balanceOf(MANAGER_ADDRESS);
+          tvl += parseFloat(ethers.utils.formatUnits(balance, stable.decimals));
+        }
+        setForgeTVL(tvl);
+
+        // Staking TVL
+        const totalSingleWei = await manager.totalSingleStake();
+        const totalLpWei = await manager.totalLpStake();
+        setTotalSingleStake(ethers.utils.formatUnits(totalSingleWei, 18));
+        setTotalLpStake(ethers.utils.formatUnits(totalLpWei, 18));
+
+        // Minted 100 count
+        const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
+        const minted = await token100.totalMinted();
+        setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchAnalytics();
+  }, [provider]);
+
+  const remaining = Math.max(0, MAX_SUPPLY - totalMinted);
+
+  return (
+    <div className="view-enter max-w-7xl mx-auto px-4 py-8">
+      <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-8">📊 ANALYTICS</h2>
+
+      {/* Live Charts */}
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="holo-card p-2">
+          <h3 className="text-sm font-mono mb-2">100/DAI</h3>
+          <iframe
+            src="https://dexscreener.com/pulsechain/0x22914141b821e394804d767185909901fda2efb0?embed=1&theme=dark&info=0"
+            className="w-full h-64 rounded"
+            title="100/DAI chart"
+          />
+        </div>
+        <div className="holo-card p-2">
+          <h3 className="text-sm font-mono mb-2">SENTS/DAI</h3>
+          <iframe
+            src="https://dexscreener.com/pulsechain/0xda7772f53f4112e8537690cb37907d51c17b3630?embed=1&theme=dark&info=0"
+            className="w-full h-64 rounded"
+            title="SENTS/DAI chart"
+          />
+        </div>
+        <div className="holo-card p-2">
+          <h3 className="text-sm font-mono mb-2">100/SENTS</h3>
+          <iframe
+            src="https://dexscreener.com/pulsechain/0x0cf6531fabbb5d0e79a814db87371636da88507f?embed=1&theme=dark&info=0"
+            className="w-full h-64 rounded"
+            title="100/SENTS chart"
+          />
+        </div>
+      </div>
+
+      {/* TVL Dashboard */}
+      <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">Forge TVL</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">${forgeTVL.toFixed(2)}</p>
+          <p className="text-xs">Stablecoin reserves</p>
+        </div>
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">Single Stake TVL</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalSingleStake).toFixed(2)} 100</p>
+        </div>
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">LP Stake TVL</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalLpStake).toFixed(2)} LP</p>
+        </div>
+        <div className="holo-card p-4 text-center">
+          <h4 className="text-sm font-mono text-[var(--text-secondary)]">100 Minted</h4>
+          <p className="text-2xl font-bold text-[var(--text-primary)]">{totalMinted} / {MAX_SUPPLY}</p>
+          <p className="text-xs">{remaining} remaining</p>
+        </div>
+      </div>
+
+      {/* Mint Progress Bar */}
+      <div className="holo-card p-4 max-w-2xl mx-auto">
+        <h4 className="text-sm font-mono text-[var(--text-secondary)] mb-2">100 Token Minting Progress</h4>
+        <div className="w-full bg-[var(--bg-primary)] h-4 rounded-full">
+          <div
+            className="bg-[var(--accent-primary)] h-4 rounded-full"
+            style={{ width: `${(totalMinted / MAX_SUPPLY) * 100}%` }}
+          ></div>
+        </div>
+        <div className="flex justify-between text-sm mt-1">
+          <span>{totalMinted} minted</span>
+          <span>{remaining} remaining</span>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 // ==============================================
 // MAIN APP
@@ -1885,7 +2072,6 @@ const App = () => {
     } else if (walletType === 'walletconnect') {
       alert('WalletConnect integration coming soon. For now, please use MetaMask.');
     } else {
-      // For other wallets, open their website or guide
       if (walletType === 'internetmoney') {
         window.open('https://internetmoney.io', '_blank');
       } else {
@@ -1921,6 +2107,7 @@ const App = () => {
     { id: 'mint', label: 'MINT 100', icon: Hourglass },
     { id: 'forge', label: 'FORGE', icon: Box },
     { id: 'yield', label: 'YIELD', icon: Zap },
+    { id: 'analytics', label: 'ANALYTICS', icon: TrendingUp },
     { id: 'trajectory', label: 'TRAJECTORY', icon: Map },
     { id: 'wallet', label: 'WALLET', icon: Wallet }
   ];
@@ -2023,6 +2210,7 @@ const App = () => {
           {activeTab === 'mint' && <MintView wallet={wallet} connect={() => setWalletConnectorOpen(true)} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
           {activeTab === 'forge' && <ForgeInterface wallet={wallet} connect={() => setWalletConnectorOpen(true)} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
           {activeTab === 'yield' && <YieldView wallet={wallet} connect={() => setWalletConnectorOpen(true)} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
+          {activeTab === 'analytics' && <AnalyticsView provider={provider} />}
           {activeTab === 'trajectory' && <TrajectoryView />}
           {activeTab === 'wallet' && (
             <WalletView
