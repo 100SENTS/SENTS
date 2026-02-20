@@ -561,9 +561,9 @@ const LandingPage = ({ setActiveTab }) => (
     </div>
 
     <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-      {['overview', 'vision', 'arbitrage', 'fees', 'backing', 'emission'].map((key) => (
+      {Object.keys(PROJECT_DETAILS).filter(k => !Array.isArray(PROJECT_DETAILS[k])).map((key) => (
         <div key={key} className="holo-card p-6">
-          <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3 capitalize">{key.replace('_',' ')}</h3>
+          <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3 capitalize">{key.replace(/_/g,' ')}</h3>
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS[key]}</p>
         </div>
       ))}
@@ -1341,13 +1341,15 @@ const WalletView = ({ wallet, balances, transactions, onBuy, onSell, onRefresh, 
   );
 };
 
-// AnalyticsView
+// Analytics View – with expandable charts
 const AnalyticsView = ({ provider }) => {
   const [forgeTVL, setForgeTVL] = useState(0);
   const [totalSingleStake, setTotalSingleStake] = useState('0');
   const [totalLpStake, setTotalLpStake] = useState('0');
   const [totalMinted, setTotalMinted] = useState(0);
   const MAX_SUPPLY = 200;
+  const [expandedChart, setExpandedChart] = useState(null); // '100dai', 'sentsdai', '100sents'
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       if (!provider) return;
@@ -1371,22 +1373,50 @@ const AnalyticsView = ({ provider }) => {
     };
     fetchAnalytics();
   }, [provider]);
+
   const remaining = Math.max(0, MAX_SUPPLY - totalMinted);
+
+  const charts = [
+    { id: '100dai', title: '100/DAI', url: 'https://dexscreener.com/pulsechain/0x22914141b821e394804d767185909901fda2efb0?embed=1&theme=dark&info=0' },
+    { id: 'sentsdai', title: 'SENTS/DAI', url: 'https://dexscreener.com/pulsechain/0xda7772f53f4112e8537690cb37907d51c17b3630?embed=1&theme=dark&info=0' },
+    { id: '100sents', title: '100/SENTS', url: 'https://dexscreener.com/pulsechain/0x0cf6531fabbb5d0e79a814db87371636da88507f?embed=1&theme=dark&info=0' }
+  ];
+
   return (
     <div className="view-enter max-w-7xl mx-auto px-4 py-8">
       <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-8">📊 ANALYTICS</h2>
+
+      {expandedChart && (
+        <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
+          <div className="flex justify-end mb-2">
+            <button onClick={() => setExpandedChart(null)} className="text-white flex items-center gap-2 font-mono hover:text-[var(--accent-primary)]"><X size={24} /> CLOSE</button>
+          </div>
+          <iframe src={charts.find(c => c.id === expandedChart)?.url} className="w-full h-full border-0 rounded-lg" title={charts.find(c => c.id === expandedChart)?.title} />
+        </div>
+      )}
+
       <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">100/DAI</h3><iframe src="https://dexscreener.com/pulsechain/0x22914141b821e394804d767185909901fda2efb0?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="100/DAI chart" /></div>
-        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">SENTS/DAI</h3><iframe src="https://dexscreener.com/pulsechain/0xda7772f53f4112e8537690cb37907d51c17b3630?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="SENTS/DAI chart" /></div>
-        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">100/SENTS</h3><iframe src="https://dexscreener.com/pulsechain/0x0cf6531fabbb5d0e79a814db87371636da88507f?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="100/SENTS chart" /></div>
+        {charts.map(chart => (
+          <div key={chart.id} className="holo-card p-2 relative group">
+            <h3 className="text-sm font-mono mb-2">{chart.title}</h3>
+            <button onClick={() => setExpandedChart(chart.id)} className="absolute top-2 right-2 bg-black/80 p-2 text-gray-400 hover:text-white rounded opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Expand chart"><Maximize2 size={16} /></button>
+            <iframe src={chart.url} className="w-full h-64 rounded pointer-events-none" title={chart.title} />
+          </div>
+        ))}
       </div>
+
       <div className="grid md:grid-cols-4 gap-4 mb-8">
         <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">Forge TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">${forgeTVL.toFixed(2)}</p><p className="text-xs">Stablecoin reserves</p></div>
         <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">Single Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalSingleStake).toFixed(2)} 100</p></div>
         <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">LP Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalLpStake).toFixed(2)} LP</p></div>
         <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">100 Minted</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{totalMinted} / {MAX_SUPPLY}</p><p className="text-xs">{remaining} remaining</p></div>
       </div>
-      <div className="holo-card p-4 max-w-2xl mx-auto"><h4 className="text-sm font-mono text-[var(--text-secondary)] mb-2">100 Token Minting Progress</h4><div className="w-full bg-[var(--bg-primary)] h-4 rounded-full"><div className="bg-[var(--accent-primary)] h-4 rounded-full" style={{ width: `${(totalMinted / MAX_SUPPLY) * 100}%` }}></div></div><div className="flex justify-between text-sm mt-1"><span>{totalMinted} minted</span><span>{remaining} remaining</span></div></div>
+
+      <div className="holo-card p-4 max-w-2xl mx-auto">
+        <h4 className="text-sm font-mono text-[var(--text-secondary)] mb-2">100 Token Minting Progress</h4>
+        <div className="w-full bg-[var(--bg-primary)] h-4 rounded-full"><div className="bg-[var(--accent-primary)] h-4 rounded-full" style={{ width: `${(totalMinted / MAX_SUPPLY) * 100}%` }}></div></div>
+        <div className="flex justify-between text-sm mt-1"><span>{totalMinted} minted</span><span>{remaining} remaining</span></div>
+      </div>
       <Footer />
     </div>
   );
