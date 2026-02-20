@@ -10,7 +10,7 @@ import {
   ChevronDown, Maximize2, Minimize2, Home, Plus, Minus, Lock,
   History, Repeat, Sun, Moon, Palette, Send, ShoppingCart,
   CreditCard, Repeat as SwapIcon, Menu, X as CloseIcon,
-  Copy, PlusCircle, LogIn, User, Image, Twitter, Send as Telegram, Youtube
+  Copy, PlusCircle, LogIn, User, Twitter, Send as Telegram, Youtube
 } from 'lucide-react';
 
 // ==============================================
@@ -18,8 +18,8 @@ import {
 // ==============================================
 const MANAGER_ADDRESS = "0x94681015615943E7cdB717c9689Ef7dbD7d85816";
 const TOKEN_100_ADDRESS = "0x042e8511E034eFB62e35393432E3Cc364ADB0EBe";
-const SENTS_ADDRESS = "0x1CAa88C07D9395fA9B75FeA418501E602dB5fD99"; // ✅ Correct SENTS address
-const MASTER_WALLET = "0x61094785Bb79feFf5fF82B335d20B88E9fead252"; // for ramp messages
+const SENTS_ADDRESS = "0x1CAa88C07D9395fA9B75FeA418501E602dB5fD99";
+const MASTER_WALLET = "0x61094785Bb79feFf5fF82B335d20B88E9fead252";
 
 // LP Token Addresses
 const LP_100_SENTS = "0x0Cf6531faBBB5d0E79a814db87371636Da88507F";
@@ -31,7 +31,7 @@ const DAI_100_PAIR = LP_100_DAI;
 const DAI_SENTS_PAIR = LP_SENTS_DAI;
 const SENTS_100_PAIR = LP_100_SENTS;
 
-const PULSECHAIN_CHAIN_ID = '0x171'; // 369
+const PULSECHAIN_CHAIN_ID = '0x171';
 const PULSECHAIN_RPC = 'https://rpc.pulsechain.com';
 
 // On/Off Ramp Links
@@ -86,7 +86,6 @@ const ERC20_ABI = [
   "function totalSupply() view returns (uint256)"
 ];
 
-// The100Token ABI with totalMinted
 const THE100_ABI = [
   ...ERC20_ABI,
   "function totalMinted() view returns (uint256)"
@@ -117,7 +116,7 @@ const RICH_TOKENS = [
 ];
 
 // ==============================================
-// THEMES (unchanged)
+// THEMES
 // ==============================================
 const THEMES = {
   dark: {
@@ -233,7 +232,7 @@ const THEMES = {
 };
 
 // ==============================================
-// PROJECT DETAILS (unchanged)
+// PROJECT DETAILS
 // ==============================================
 const PROJECT_DETAILS = {
   overview: `100SENTS is a privacy‑centric stable unit protocol built on PulseChain. 
@@ -405,13 +404,11 @@ const baseStyles = `
 // ==============================================
 const CopyableAddress = ({ address, symbol, showSymbol = true }) => {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = () => {
     navigator.clipboard.writeText(address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
   return (
     <div className="flex items-center gap-1 group">
       {showSymbol && <span className="font-bold">{symbol}</span>}
@@ -431,7 +428,7 @@ const CopyableAddress = ({ address, symbol, showSymbol = true }) => {
 // COMPONENTS
 // ==============================================
 
-// Transaction Modal (unchanged)
+// Transaction Modal
 const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   if (!isOpen) return null;
   return (
@@ -459,7 +456,7 @@ const TransactionModal = ({ isOpen, onClose, status, title, hash, step }) => {
   );
 };
 
-// Piteas Iframe (unchanged)
+// Piteas Iframe
 const PiteasIframe = ({ onClose }) => (
   <div className="fixed inset-0 z-50 bg-black/95 p-4 flex flex-col">
     <div className="flex justify-end mb-2">
@@ -469,17 +466,13 @@ const PiteasIframe = ({ onClose }) => (
   </div>
 );
 
-// Theme Switcher (unchanged)
+// Theme Switcher
 const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const themeNames = Object.keys(THEMES);
-
   return (
     <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full border border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors"
-      >
+      <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-full border border-[var(--border)] hover:bg-[var(--bg-secondary)] transition-colors">
         <Palette size={18} />
       </button>
       {isOpen && (
@@ -487,10 +480,7 @@ const ThemeSwitcher = ({ currentTheme, setTheme }) => {
           {themeNames.map(name => (
             <button
               key={name}
-              onClick={() => {
-                setTheme(name);
-                setIsOpen(false);
-              }}
+              onClick={() => { setTheme(name); setIsOpen(false); }}
               className={`block w-full text-left px-4 py-2 text-sm font-mono hover:bg-[var(--accent-primary)]/10 capitalize ${
                 currentTheme === name ? 'text-[var(--accent-primary)] font-bold' : 'text-[var(--text-primary)]'
               }`}
@@ -504,100 +494,53 @@ const ThemeSwitcher = ({ currentTheme, setTheme }) => {
   );
 };
 
-// Flow Animation Component (unchanged)
+// Flow Animation
 const FlowAnimation = () => (
   <div className="holo-card p-8 max-w-4xl mx-auto">
     <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-6 text-center">HOW IT WORKS</h2>
     <div className="flow-container">
-      <div className="flow-step" style={{ '--step': 0 }}>
-        <div className="icon"><Coins size={24} /></div>
-        <div className="text-sm font-mono">Mint 100</div>
-      </div>
-      <div className="flow-arrow">→</div>
-      <div className="flow-step" style={{ '--step': 1 }}>
-        <div className="icon"><Zap size={24} /></div>
-        <div className="text-sm font-mono">Single Stake</div>
-      </div>
-      <div className="flow-arrow">→</div>
-      <div className="flow-step" style={{ '--step': 2 }}>
-        <div className="icon"><TrendingUp size={24} /></div>
-        <div className="text-sm font-mono">Earn SENTS</div>
-      </div>
-      <div className="flow-arrow">→</div>
-      <div className="flow-step" style={{ '--step': 3 }}>
-        <div className="icon"><Layers size={24} /></div>
-        <div className="text-sm font-mono">LP 100 + SENTS</div>
-      </div>
-      <div className="flow-arrow">→</div>
-      <div className="flow-step" style={{ '--step': 4 }}>
-        <div className="icon"><Box size={24} /></div>
-        <div className="text-sm font-mono">Stake LP</div>
-      </div>
-      <div className="flow-arrow">→</div>
-      <div className="flow-step" style={{ '--step': 5 }}>
-        <div className="icon"><Rocket size={24} /></div>
-        <div className="text-sm font-mono">Earn More SENTS + 100</div>
-      </div>
+      {[
+        { icon: Coins, label: "Mint 100" },
+        { icon: Zap, label: "Single Stake" },
+        { icon: TrendingUp, label: "Earn SENTS" },
+        { icon: Layers, label: "LP 100 + SENTS" },
+        { icon: Box, label: "Stake LP" },
+        { icon: Rocket, label: "Earn More SENTS + 100" }
+      ].map((step, idx) => (
+        <React.Fragment key={idx}>
+          <div className="flow-step" style={{ '--step': idx }}>
+            <div className="icon"><step.icon size={24} /></div>
+            <div className="text-sm font-mono">{step.label}</div>
+          </div>
+          {idx < 5 && <div className="flow-arrow">→</div>}
+        </React.Fragment>
+      ))}
     </div>
   </div>
 );
 
-// Footer with Social Links (unchanged)
+// Footer
 const Footer = () => (
   <footer className="mt-16 py-8 border-t border-[var(--border)]">
     <div className="flex justify-center gap-8">
-      <a
-        href={SOCIAL_LINKS.twitter}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
-      >
-        <Twitter size={24} />
-      </a>
-      <a
-        href={SOCIAL_LINKS.telegram}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
-      >
-        <Telegram size={24} />
-      </a>
-      <a
-        href={SOCIAL_LINKS.youtube}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"
-      >
-        <Youtube size={24} />
-      </a>
+      <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer" className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"><Twitter size={24} /></a>
+      <a href={SOCIAL_LINKS.telegram} target="_blank" rel="noopener noreferrer" className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"><Telegram size={24} /></a>
+      <a href={SOCIAL_LINKS.youtube} target="_blank" rel="noopener noreferrer" className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)] transition-colors"><Youtube size={24} /></a>
     </div>
-    <p className="text-center text-xs text-[var(--text-secondary)] mt-4">
-      © 2024 100SENTS. All rights reserved.
-    </p>
+    <p className="text-center text-xs text-[var(--text-secondary)] mt-4">© 2024 100SENTS. All rights reserved.</p>
   </footer>
 );
 
-// Landing Page (unchanged, with Footer)
+// Landing Page
 const LandingPage = ({ setActiveTab }) => (
   <div className="view-enter max-w-6xl mx-auto px-4 py-12 space-y-16">
     <div className="text-center">
-      <h1 className="text-7xl font-black text-[var(--text-primary)] mb-4 tracking-tighter">
-        100<span className="text-[var(--accent-primary)]">SENTS</span>
-      </h1>
-      <p className="text-2xl text-[var(--text-secondary)] font-mono mb-6">
-        THE FUTURE OF FINANCIAL PRIVACY
-      </p>
-      <p className="text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">
-        A privacy‑centric stable unit aggregator and scarcity engine on PulseChain. 
-        Escape the centralized control system.
-      </p>
+      <h1 className="text-7xl font-black text-[var(--text-primary)] mb-4 tracking-tighter">100<span className="text-[var(--accent-primary)]">SENTS</span></h1>
+      <p className="text-2xl text-[var(--text-secondary)] font-mono mb-6">THE FUTURE OF FINANCIAL PRIVACY</p>
+      <p className="text-lg text-[var(--text-secondary)] max-w-3xl mx-auto">A privacy‑centric stable unit aggregator and scarcity engine on PulseChain. Escape the centralized control system.</p>
       <div className="flex gap-4 justify-center mt-8">
-        <button onClick={() => setActiveTab('mint')} className="px-6 py-3 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-colors rounded">
-          MINT 100
-        </button>
-        <button onClick={() => setActiveTab('forge')} className="px-6 py-3 border border-[var(--accent-primary)] text-[var(--accent-primary)] font-mono hover:bg-[var(--accent-primary)]/10 rounded">
-          FORGE SENTS
-        </button>
+        <button onClick={() => setActiveTab('mint')} className="px-6 py-3 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-colors rounded">MINT 100</button>
+        <button onClick={() => setActiveTab('forge')} className="px-6 py-3 border border-[var(--accent-primary)] text-[var(--accent-primary)] font-mono hover:bg-[var(--accent-primary)]/10 rounded">FORGE SENTS</button>
       </div>
     </div>
 
@@ -618,52 +561,26 @@ const LandingPage = ({ setActiveTab }) => (
     </div>
 
     <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🌌 OVERVIEW</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.overview}</p>
-      </div>
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔮 VISION</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.vision}</p>
-      </div>
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">📈 ARBITRAGE</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.arbitrage}</p>
-      </div>
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">💸 FEE DISTRIBUTION</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.fees}</p>
-      </div>
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">🔒 BACKING</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.backing}</p>
-      </div>
-      <div className="holo-card p-6">
-        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">📉 EMISSION & DEFLATION</h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS.emission}</p>
-      </div>
+      {['overview', 'vision', 'arbitrage', 'fees', 'backing', 'emission'].map((key) => (
+        <div key={key} className="holo-card p-6">
+          <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3 capitalize">{key.replace('_',' ')}</h3>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{PROJECT_DETAILS[key]}</p>
+        </div>
+      ))}
     </div>
 
     <FlowAnimation />
 
     <div className="holo-card p-8 text-center max-w-3xl mx-auto">
       <h2 className="text-2xl font-mono text-[var(--accent-primary)] mb-4">🔮 THE CONSTANT – A WORLD FIRST</h2>
-      <p className="text-[var(--text-secondary)] mb-4">
-        In Phase 4, SENTS will become the first stablecoin backed by a <span className="text-[var(--accent-primary)]">universal constant</span> – 
-        a breakthrough that eliminates any reliance on fiat or oracles. This constant is derived from 
-        fundamental physics and mathematics, making it truly unstoppable and independent of any government 
-        or institution. Combined with zk‑proofs, every transaction becomes private and trustless.
-      </p>
-      <p className="text-sm text-[var(--text-secondary)] italic">
-        After the minting phases complete, "The 100" enters a deflationary era via buy‑and‑burn. 
-        How high can it go? The market will decide.
-      </p>
+      <p className="text-[var(--text-secondary)] mb-4">In Phase 4, SENTS will become the first stablecoin backed by a <span className="text-[var(--accent-primary)]">universal constant</span> – a breakthrough that eliminates any reliance on fiat or oracles. This constant is derived from fundamental physics and mathematics, making it truly unstoppable and independent of any government or institution. Combined with zk‑proofs, every transaction becomes private and trustless.</p>
+      <p className="text-sm text-[var(--text-secondary)] italic">After the minting phases complete, "The 100" enters a deflationary era via buy‑and‑burn. How high can it go? The market will decide.</p>
     </div>
     <Footer />
   </div>
 );
 
-// Mint View (with counter) – unchanged from previous version
+// Mint View
 const MintView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [amount, setAmount] = useState(1);
   const [selectedToken, setSelectedToken] = useState(MINT_TOKENS[0]);
@@ -685,56 +602,36 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
           const bal = await tokenContract.balanceOf(wallet);
           setUserBalance(ethers.utils.formatUnits(bal, selectedToken.decimals));
         }
-        // Fetch total minted 100 tokens
         const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
         const minted = await token100.totalMinted();
         setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     };
     fetchData();
   }, [wallet, provider, selectedToken]);
 
   const handleMint = async () => {
-    if (!wallet) {
-      connect();
-      return;
-    }
-    if (!rate || rate.isZero()) {
-      alert('Minting not enabled for this token');
-      return;
-    }
+    if (!wallet) { connect(); return; }
+    if (!rate || rate.isZero()) { alert('Minting not enabled for this token'); return; }
     setTxState({ open: true, status: 'approving', title: `Minting ${amount} x "100"`, step: 'Preparing...' });
-
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const tokenContract = new ethers.Contract(selectedToken.addr, ERC20_ABI, signer);
-
       const amount100Wei = ethers.utils.parseUnits(amount.toString(), 18);
       const costWei = amount100Wei.mul(rate).div(ethers.constants.WeiPerEther);
-
       const allowance = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
       if (allowance.lt(costWei)) {
         const approveTx = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
         setTxState(s => ({ ...s, status: 'pending', step: 'Approving Token...' }));
         await approveTx.wait();
       }
-
       setTxState(s => ({ ...s, status: 'pending', step: 'Minting "The 100"...' }));
       const tx = await manager.mintThe100WithToken(selectedToken.addr, amount100Wei);
       await tx.wait();
-
       setTxState({ open: true, status: 'success', title: 'Mint Successful', hash: tx.hash });
-      addTransaction({
-        type: 'Mint 100',
-        amount: `${amount} 100`,
-        hash: tx.hash,
-        timestamp: Date.now()
-      });
+      addTransaction({ type: 'Mint 100', amount: `${amount} 100`, hash: tx.hash, timestamp: Date.now() });
       updateBalances();
-      // Update minted count
       const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
       const minted = await token100.totalMinted();
       setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
@@ -750,37 +647,21 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   return (
     <div className="view-enter max-w-6xl mx-auto px-4 py-8">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
-
       <div className="grid lg:grid-cols-2 gap-12 items-start">
         <div className="space-y-6">
-          <h1 className="text-6xl font-black text-[var(--text-primary)] leading-none tracking-tighter">
-            MINT 100.<br />
-            <span className="text-[var(--accent-primary)]">BUILD SENTS.</span>
-          </h1>
-
-          {/* Mint Counter */}
+          <h1 className="text-6xl font-black text-[var(--text-primary)] leading-none tracking-tighter">MINT 100.<br /><span className="text-[var(--accent-primary)]">BUILD SENTS.</span></h1>
           <div className="holo-card p-4 text-center">
             <div className="text-sm text-[var(--text-secondary)]">100 TOKENS REMAINING</div>
             <div className="text-4xl font-bold text-[var(--accent-primary)]">{remaining}</div>
             <div className="text-xs text-[var(--text-secondary)]">out of {MAX_SUPPLY} total supply</div>
           </div>
-
           <div className="holo-card p-6 border-l-4 border-[var(--accent-primary)]">
-            <h3 className="text-lg font-bold text-[var(--accent-primary)] font-mono mb-2 flex items-center gap-2">
-              <AlertTriangle size={16} /> MINTING PHASE ACTIVE
-            </h3>
-            <p className="text-sm text-[var(--text-secondary)] mb-2">
-              Cost is hard‑pegged at <strong>$1,000 Equivalent</strong> in approved stablecoins.
-            </p>
-            <p className="text-xs text-[var(--text-secondary)] italic">
-              Arbitrage Opportunity: If market price {'>'} $1,000, mint here and sell on PulseX to stabilise the peg.
-            </p>
+            <h3 className="text-lg font-bold text-[var(--accent-primary)] font-mono mb-2 flex items-center gap-2"><AlertTriangle size={16} /> MINTING PHASE ACTIVE</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-2">Cost is hard‑pegged at <strong>$1,000 Equivalent</strong> in approved stablecoins.</p>
+            <p className="text-xs text-[var(--text-secondary)] italic">Arbitrage Opportunity: If market price {'>'} $1,000, mint here and sell on PulseX to stabilise the peg.</p>
           </div>
-
           <div className="holo-card p-6">
-            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2">
-              <Hexagon size={16} className="text-[var(--accent-primary)]" /> Why hold <span className="text-[var(--accent-primary)]">The 100</span>?
-            </h4>
+            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2"><Hexagon size={16} className="text-[var(--accent-primary)]" /> Why hold <span className="text-[var(--accent-primary)]">The 100</span>?</h4>
             <ul className="text-sm text-[var(--text-secondary)] space-y-2 list-disc pl-5 font-mono">
               <li>Governance rights over the protocol.</li>
               <li>Earn 25% of all protocol fees via single staking.</li>
@@ -788,22 +669,12 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
               <li>Hyper‑scarce supply – only 200 will ever exist.</li>
             </ul>
           </div>
-
           <div className="holo-card p-6">
-            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2">
-              <TrendingUp size={16} className="text-[var(--accent-primary)]" /> Arbitrage Mechanics
-            </h4>
-            <p className="text-sm text-[var(--text-secondary)] mb-2">
-              When liquidity pools launch, "The 100" will trade freely on PulseX. 
-              If the market price rises above the $1,000 minting cost, arbitrageurs can mint new "The 100" 
-              here and sell them on the DEX for a profit, simultaneously stabilising the price.
-            </p>
-            <p className="text-sm text-[var(--text-secondary)]">
-              This creates a natural price floor and ceiling, ensuring "The 100" remains closely pegged to its fundamental value.
-            </p>
+            <h4 className="text-md font-bold text-[var(--text-primary)] mb-3 font-mono flex items-center gap-2"><TrendingUp size={16} className="text-[var(--accent-primary)]" /> Arbitrage Mechanics</h4>
+            <p className="text-sm text-[var(--text-secondary)] mb-2">When liquidity pools launch, "The 100" will trade freely on PulseX. If the market price rises above the $1,000 minting cost, arbitrageurs can mint new "The 100" here and sell them on the DEX for a profit, simultaneously stabilising the price.</p>
+            <p className="text-sm text-[var(--text-secondary)]">This creates a natural price floor and ceiling, ensuring "The 100" remains closely pegged to its fundamental value.</p>
           </div>
         </div>
-
         <div className="holo-card p-8 bg-[var(--bg-secondary)]">
           <div className="space-y-6">
             <div>
@@ -823,37 +694,20 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
                 </div>
               </div>
             </div>
-
             <div>
               <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">PAYMENT ASSET (STABLECOINS)</label>
               <div className="flex items-center gap-2">
-                <select
-                  className="flex-1 bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"
-                  onChange={(e) => setSelectedToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
-                >
-                  {MINT_TOKENS.map((t) => (
-                    <option key={t.symbol} value={t.symbol}>
-                      {t.name}
-                    </option>
-                  ))}
+                <select className="flex-1 bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" onChange={e => setSelectedToken(MINT_TOKENS.find(t => t.symbol === e.target.value))}>
+                  {MINT_TOKENS.map(t => <option key={t.symbol} value={t.symbol}>{t.name}</option>)}
                 </select>
                 <CopyableAddress address={selectedToken.addr} symbol={selectedToken.symbol} />
               </div>
             </div>
-
             <div className="flex justify-between bg-[var(--bg-primary)] p-4 rounded">
               <span className="text-[var(--text-secondary)] text-xs font-mono">TOTAL COST</span>
-              <span className="text-[var(--text-primary)] font-mono text-xl">
-                {displayCost} {selectedToken.symbol}
-              </span>
+              <span className="text-[var(--text-primary)] font-mono text-xl">{displayCost} {selectedToken.symbol}</span>
             </div>
-
-            <button
-              onClick={handleMint}
-              className="w-full py-4 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-opacity uppercase tracking-widest rounded"
-            >
-              {wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}
-            </button>
+            <button onClick={handleMint} className="w-full py-4 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 transition-opacity uppercase tracking-widest rounded">{wallet ? 'INITIATE MINT' : 'CONNECT WALLET'}</button>
           </div>
         </div>
       </div>
@@ -862,7 +716,7 @@ const MintView = ({ wallet, connect, provider, updateBalances, addTransaction })
   );
 };
 
-// Forge Interface (with updated SENTS address)
+// Forge Interface
 const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
   const [mode, setMode] = useState('forge');
   const [amount, setAmount] = useState('');
@@ -889,8 +743,6 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
           const bal = await sentsContract.balanceOf(wallet);
           setUserBalance(ethers.utils.formatUnits(bal, 18));
         }
-
-        // Fetch Forge TVL (total stablecoin reserves)
         let tvl = 0;
         for (const stable of MINT_TOKENS) {
           const tokenContract = new ethers.Contract(stable.addr, ERC20_ABI, provider);
@@ -898,27 +750,20 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
           tvl += parseFloat(ethers.utils.formatUnits(balance, stable.decimals));
         }
         setForgeTVL(tvl);
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
     };
     fetchData();
   }, [wallet, provider, mode, token]);
 
   const handleForge = async () => {
-    if (!wallet) {
-      connect();
-      return;
-    }
+    if (!wallet) { connect(); return; }
     if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
     if (mode === 'forge' && !isForgeable) return alert('Token not enabled for forging');
     setTxState({ open: true, status: 'approving', title: mode === 'forge' ? 'FORGE SENTS' : 'UNFORGE SENTS' });
-
     try {
       const signer = provider.getSigner();
       const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
       const targetRecipient = recipient || wallet;
-
       if (mode === 'forge') {
         const tokenContract = new ethers.Contract(token.addr, ERC20_ABI, signer);
         const valWei = ethers.utils.parseUnits(amount, token.decimals);
@@ -955,67 +800,31 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
     }
   };
 
-  const outputAmount = amount
-    ? mode === 'forge'
-      ? (parseFloat(amount) * 100 * 0.99).toFixed(2)
-      : (parseFloat(amount) / 100 * 0.99).toFixed(6)
-    : '0';
+  const outputAmount = amount ? (mode === 'forge' ? (parseFloat(amount) * 100 * 0.99).toFixed(2) : (parseFloat(amount) / 100 * 0.99).toFixed(6)) : '0';
 
   return (
     <div className="view-enter max-w-4xl mx-auto px-4 py-8">
       <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
-
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-[var(--text-primary)] flex items-center justify-center gap-3">
-          <Box className="text-[var(--accent-primary)]" /> SENTS FORGE
-        </h2>
+        <h2 className="text-3xl font-bold text-[var(--text-primary)] flex items-center justify-center gap-3"><Box className="text-[var(--accent-primary)]" /> SENTS FORGE</h2>
         <p className="text-[var(--text-secondary)] font-mono text-sm mt-2">1 SENTS = $0.01 USD. 1% Protocol Fee applies.</p>
       </div>
-
       <div className="grid lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
           <div className="holo-card p-8">
             <div className="flex mb-8 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border)]">
-              <button
-                onClick={() => setMode('forge')}
-                className={`flex-1 py-2 font-mono text-sm rounded ${
-                  mode === 'forge' ? 'bg-[var(--accent-primary)] text-black font-bold' : 'text-[var(--text-secondary)]'
-                }`}
-              >
-                FORGE
-              </button>
-              <button
-                onClick={() => setMode('unforge')}
-                className={`flex-1 py-2 font-mono text-sm rounded ${
-                  mode === 'unforge' ? 'bg-[var(--accent-secondary)] text-black font-bold' : 'text-[var(--text-secondary)]'
-                }`}
-              >
-                UNFORGE
-              </button>
+              <button onClick={() => setMode('forge')} className={`flex-1 py-2 font-mono text-sm rounded ${mode === 'forge' ? 'bg-[var(--accent-primary)] text-black font-bold' : 'text-[var(--text-secondary)]'}`}>FORGE</button>
+              <button onClick={() => setMode('unforge')} className={`flex-1 py-2 font-mono text-sm rounded ${mode === 'unforge' ? 'bg-[var(--accent-secondary)] text-black font-bold' : 'text-[var(--text-secondary)]'}`}>UNFORGE</button>
             </div>
-
             <div className="space-y-6">
               <div className="bg-[var(--bg-primary)] p-4 border border-[var(--border)] rounded-lg">
                 <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">INPUT</label>
                 <div className="flex gap-4">
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="bg-transparent text-3xl font-mono text-[var(--text-primary)] outline-none w-full"
-                  />
+                  <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="bg-transparent text-3xl font-mono text-[var(--text-primary)] outline-none w-full" />
                   {mode === 'forge' ? (
                     <div className="flex items-center gap-2">
-                      <select
-                        className="bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] px-3 font-mono rounded"
-                        onChange={(e) => setToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}
-                      >
-                        {MINT_TOKENS.map((t) => (
-                          <option key={t.symbol} value={t.symbol}>
-                            {t.symbol}
-                          </option>
-                        ))}
+                      <select className="bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] px-3 font-mono rounded" onChange={(e) => setToken(MINT_TOKENS.find((t) => t.symbol === e.target.value))}>
+                        {MINT_TOKENS.map((t) => <option key={t.symbol} value={t.symbol}>{t.symbol}</option>)}
                       </select>
                       <CopyableAddress address={token.addr} symbol={token.symbol} />
                     </div>
@@ -1036,11 +845,7 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
                   </div>
                 </div>
               </div>
-
-              <div className="flex justify-center">
-                <ArrowDown className={mode === 'forge' ? 'text-[var(--accent-primary)]' : 'text-[var(--accent-secondary)]'} />
-              </div>
-
+              <div className="flex justify-center"><ArrowDown className={mode === 'forge' ? 'text-[var(--accent-primary)]' : 'text-[var(--accent-secondary)]'} /></div>
               <div className="bg-[var(--bg-primary)] p-4 border border-[var(--border)] rounded-lg">
                 <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">OUTPUT</label>
                 <div className="flex gap-4 items-center">
@@ -1055,50 +860,20 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
                   )}
                 </div>
               </div>
-
               <div className="mt-4 p-4 border-2 border-[var(--accent-secondary)] rounded-lg bg-[var(--accent-secondary)]/10 relative">
-                <div className="absolute -top-3 left-4 px-2 bg-[var(--bg-secondary)] text-[var(--accent-secondary)] text-xs font-mono flex items-center gap-1">
-                  <Shield size={12} /> PRIVACY MIXER
-                </div>
+                <div className="absolute -top-3 left-4 px-2 bg-[var(--bg-secondary)] text-[var(--accent-secondary)] text-xs font-mono flex items-center gap-1"><Shield size={12} /> PRIVACY MIXER</div>
                 <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">RECIPIENT ADDRESS (optional)</label>
-                <input
-                  type="text"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  placeholder="0x... (leave empty to receive in your wallet)"
-                  className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"
-                />
-                <p className="text-xs text-[var(--text-secondary)] mt-2 italic flex items-center gap-1">
-                  <Sparkles size={12} className="text-[var(--accent-secondary)]" />
-                  Send to a different address to break the on-chain link — like Tornado Cash but simpler.
-                </p>
+                <input type="text" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="0x... (leave empty to receive in your wallet)" className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" />
+                <p className="text-xs text-[var(--text-secondary)] mt-2 italic flex items-center gap-1"><Sparkles size={12} className="text-[var(--accent-secondary)]" /> Send to a different address to break the on-chain link — like Tornado Cash but simpler.</p>
               </div>
-
               <div className="text-xs text-[var(--text-secondary)] font-mono space-y-1 border-t border-[var(--border)] pt-4">
-                <div className="flex justify-between">
-                  <span>Fee (1%)</span>
-                  <span>{(amount * 0.01).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-[var(--accent-primary)]">
-                  <span>Distribution:</span>
-                  <span>50% Stakers / 30% Reserve / 20% Operations</span>
-                </div>
+                <div className="flex justify-between"><span>Fee (1%)</span><span>{(amount * 0.01).toFixed(2)}</span></div>
+                <div className="flex justify-between text-[var(--accent-primary)]"><span>Distribution:</span><span>50% Stakers / 30% Reserve / 20% Operations</span></div>
               </div>
-
-              <button
-                onClick={handleForge}
-                className={`w-full py-4 font-bold font-mono transition-colors uppercase rounded ${
-                  mode === 'forge'
-                    ? 'bg-[var(--accent-primary)] text-black hover:opacity-90'
-                    : 'bg-[var(--accent-secondary)] text-black hover:opacity-90'
-                }`}
-              >
-                {mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}
-              </button>
+              <button onClick={handleForge} className={`w-full py-4 font-bold font-mono transition-colors uppercase rounded ${mode === 'forge' ? 'bg-[var(--accent-primary)] text-black hover:opacity-90' : 'bg-[var(--accent-secondary)] text-black hover:opacity-90'}`}>{mode === 'forge' ? 'EXECUTE FORGE' : 'EXECUTE UNFORGE'}</button>
             </div>
           </div>
         </div>
-
         <div className="space-y-4">
           <div className="holo-card p-6">
             <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-3">💸 FEE DISTRIBUTION</h3>
@@ -1125,61 +900,508 @@ const ForgeInterface = ({ wallet, connect, provider, updateBalances, addTransact
   );
 };
 
-// Yield View (unchanged)
+// Yield View
 const YieldView = ({ wallet, connect, provider, updateBalances, addTransaction }) => {
-  // ... (same as before)
-  // For brevity, I'll keep it as it was – the full version is in the previous final answer.
-  // In a real update, we'd copy the entire component from the previous final code.
+  const [stakeType, setStakeType] = useState('single');
+  const [amount, setAmount] = useState('');
+  const [txState, setTxState] = useState({ open: false, status: 'idle' });
+  const [userStake, setUserStake] = useState('0');
+  const [totalSingleStake, setTotalSingleStake] = useState('0');
+  const [totalLpStake, setTotalLpStake] = useState('0');
+  const [userShare, setUserShare] = useState(0);
+  const [pendingFees, setPendingFees] = useState({});
+  const [pendingLp, setPendingLp] = useState('0');
+  const [stablecoins, setStablecoins] = useState([]);
+  const [decimalsMap, setDecimalsMap] = useState({});
+  const [stakeBalance, setStakeBalance] = useState('0');
+  const [lpTokenSet, setLpTokenSet] = useState(true);
+  const [allowance, setAllowance] = useState('0');
+  const [managerBalance, setManagerBalance] = useState('0');
+
+  useEffect(() => {
+    const checkLpToken = async () => {
+      if (!provider) return;
+      try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+        const lpAddr = await manager.getLpToken();
+        setLpTokenSet(lpAddr !== ethers.constants.AddressZero);
+      } catch { setLpTokenSet(false); }
+    };
+    checkLpToken();
+  }, [provider]);
+
+  useEffect(() => {
+    const fetchStakeBalance = async () => {
+      if (!wallet || !provider) return;
+      try {
+        const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : LP_100_SENTS;
+        const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+        const bal = await tokenContract.balanceOf(wallet);
+        setStakeBalance(ethers.utils.formatUnits(bal, 18));
+        if (stakeType === 'single') {
+          const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
+          setAllowance(ethers.utils.formatUnits(allowanceWei, 18));
+          const managerBal = await tokenContract.balanceOf(MANAGER_ADDRESS);
+          setManagerBalance(ethers.utils.formatUnits(managerBal, 18));
+        }
+      } catch (e) { setStakeBalance('0'); }
+    };
+    fetchStakeBalance();
+  }, [wallet, provider, stakeType]);
+
+  const fetchData = async () => {
+    if (!wallet || !provider) return;
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const userStakeWei = await manager.getStakedAmount(wallet, stakeType === 'lp');
+      setUserStake(userStakeWei.toString());
+      const totalSingleWei = await manager.totalSingleStake();
+      const totalLpWei = await manager.totalLpStake();
+      setTotalSingleStake(ethers.utils.formatUnits(totalSingleWei, 18));
+      setTotalLpStake(ethers.utils.formatUnits(totalLpWei, 18));
+      const totalStakeWei = stakeType === 'single' ? totalSingleWei : totalLpWei;
+      const share = totalStakeWei.isZero() ? 0 : userStakeWei.mul(10000).div(totalStakeWei).toNumber() / 100;
+      setUserShare(share);
+      const stableList = await manager.getStablecoins();
+      setStablecoins(stableList);
+      const decimals = {};
+      for (let addr of stableList) {
+        try {
+          const token = new ethers.Contract(addr, ERC20_ABI, provider);
+          decimals[addr] = await token.decimals();
+        } catch { decimals[addr] = 18; }
+      }
+      setDecimalsMap(decimals);
+      const fees = {};
+      for (let addr of stableList) {
+        const pending = await manager.pendingFeeRewards(wallet, stakeType === 'lp', addr);
+        fees[addr] = pending.toString();
+      }
+      setPendingFees(fees);
+      if (stakeType === 'lp') {
+        const lpReward = await manager.pendingLpReward(wallet);
+        setPendingLp(lpReward.toString());
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, [wallet, provider, stakeType]);
+
+  const handleStake = async () => {
+    if (!wallet) { connect(); return; }
+    if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    if (stakeType === 'lp' && !lpTokenSet) { alert('LP staking is not yet available'); return; }
+    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'STAKE 100' : 'STAKE LP' });
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const tokenAddr = stakeType === 'single' ? TOKEN_100_ADDRESS : LP_100_SENTS;
+      const tokenContract = new ethers.Contract(tokenAddr, ERC20_ABI, signer);
+      const stakeWei = ethers.utils.parseUnits(amount, 18);
+      const allowanceWei = await tokenContract.allowance(wallet, MANAGER_ADDRESS);
+      if (allowanceWei.lt(stakeWei)) {
+        setTxState(s => ({ ...s, status: 'pending', step: 'Approving...' }));
+        const txApp = await tokenContract.approve(MANAGER_ADDRESS, ethers.constants.MaxUint256);
+        await txApp.wait();
+      }
+      setTxState(s => ({ ...s, status: 'pending', step: 'Staking...' }));
+      const tx = await manager.stake(stakeWei, stakeType === 'lp');
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'Stake Successful', hash: tx.hash });
+      addTransaction({ type: stakeType === 'single' ? 'Stake 100' : 'Stake LP', amount: `${amount} tokens`, hash: tx.hash, timestamp: Date.now() });
+      updateBalances();
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleUnstake = async () => {
+    if (!wallet) { connect(); return; }
+    if (!amount || parseFloat(amount) <= 0) return alert('Enter amount');
+    setTxState({ open: true, status: 'approving', title: stakeType === 'single' ? 'UNSTAKE 100' : 'UNSTAKE LP' });
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const stakeWei = ethers.utils.parseUnits(amount, 18);
+      setTxState(s => ({ ...s, status: 'pending', step: 'Unstaking...' }));
+      const tx = await manager.unstake(stakeWei, stakeType === 'lp');
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'Unstake Successful', hash: tx.hash });
+      addTransaction({ type: stakeType === 'single' ? 'Unstake 100' : 'Unstake LP', amount: `${amount} tokens`, hash: tx.hash, timestamp: Date.now() });
+      updateBalances();
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleClaimFees = async () => {
+    if (!wallet) { connect(); return; }
+    setTxState({ open: true, status: 'pending', title: 'CLAIMING FEES' });
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const tx = await manager.claimFees(stakeType === 'lp');
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'Fees Claimed', hash: tx.hash });
+      addTransaction({ type: 'Claim Fees', amount: 'all', hash: tx.hash, timestamp: Date.now() });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const handleClaimLp = async () => {
+    if (!wallet) { connect(); return; }
+    setTxState({ open: true, status: 'pending', title: 'CLAIMING LP REWARDS' });
+    try {
+      const signer = provider.getSigner();
+      const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, signer);
+      const tx = await manager.claimLpReward();
+      await tx.wait();
+      setTxState({ open: true, status: 'success', title: 'LP Rewards Claimed', hash: tx.hash });
+      addTransaction({ type: 'Claim LP Rewards', amount: 'all', hash: tx.hash, timestamp: Date.now() });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      setTxState({ open: true, status: 'error', title: 'Transaction Failed', step: e.reason || e.message });
+    }
+  };
+
+  const formatFull = (val, decimals = 18) => {
+    try { return ethers.utils.formatUnits(val, decimals); } catch { return val; }
+  };
+
+  const getUserStakeDecimal = () => {
+    if (!userStake || userStake === '0') return 0;
+    return parseFloat(ethers.utils.formatUnits(userStake, 18));
+  };
+
+  return (
+    <div className="view-enter max-w-6xl mx-auto px-4 py-8">
+      <TransactionModal isOpen={txState.open} onClose={() => setTxState({ open: false })} {...txState} />
+      <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-8">YIELD NEXUS</h2>
+      <div className="flex justify-center mb-8 bg-[var(--bg-primary)] p-1 rounded-lg border border-[var(--border)] w-fit mx-auto">
+        <button onClick={() => setStakeType('single')} className={`px-6 py-2 font-mono text-sm rounded ${stakeType === 'single' ? 'bg-[var(--accent-primary)] text-black font-bold' : 'text-[var(--text-secondary)]'}`}>SINGLE STAKE (100)</button>
+        <button onClick={() => setStakeType('lp')} disabled={!lpTokenSet} className={`px-6 py-2 font-mono text-sm rounded ${stakeType === 'lp' ? 'bg-[var(--accent-secondary)] text-black font-bold' : !lpTokenSet ? 'text-gray-600 cursor-not-allowed' : 'text-[var(--text-secondary)]'}`}>LP STAKE (100/SENTS) {!lpTokenSet && '(coming soon)'}</button>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">Single Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalSingleStake).toFixed(2)} 100</p></div>
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">LP Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalLpStake).toFixed(2)} LP</p></div>
+      </div>
+      {stakeType === 'single' && (
+        <div className="grid grid-cols-3 gap-4 mb-4 text-xs font-mono max-w-2xl mx-auto">
+          <div className="holo-card p-2 bg-[var(--bg-primary)]"><span className="text-[var(--text-secondary)]">Your 100 Balance:</span><span className="text-[var(--text-primary)] ml-2">{parseFloat(stakeBalance).toFixed(4)}</span></div>
+          <div className="holo-card p-2 bg-[var(--bg-primary)]"><span className="text-[var(--text-secondary)]">Allowance:</span><span className="text-[var(--text-primary)] ml-2">{parseFloat(allowance).toFixed(4)}</span></div>
+          <div className="holo-card p-2 bg-[var(--bg-primary)]"><span className="text-[var(--text-secondary)]">Manager 100 Balance:</span><span className="text-[var(--text-primary)] ml-2">{parseFloat(managerBalance).toFixed(4)}</span></div>
+        </div>
+      )}
+      <div className="grid md:grid-cols-3 gap-6 mb-8 max-w-5xl mx-auto">
+        <div className="holo-card p-6"><h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">YOUR POSITION</h3><div className="space-y-3"><div className="flex justify-between"><span className="text-[var(--text-secondary)] text-sm">Staked</span><span className="text-[var(--text-primary)] font-mono">{formatFull(userStake, 18)}</span></div><div className="flex justify-between"><span className="text-[var(--text-secondary)] text-sm">Your Share</span><span className="text-[var(--accent-primary)] font-mono">{userShare.toFixed(4)}%</span></div></div></div>
+        <div className="holo-card p-6"><h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">PENDING REWARDS</h3><div className="space-y-2 max-h-40 overflow-y-auto">{stablecoins.map((addr) => { const ti = MINT_TOKENS.find(t => t.addr.toLowerCase() === addr.toLowerCase()); const sym = ti?.symbol || addr.slice(0,6); return (<div key={addr} className="flex justify-between items-center text-sm"><div className="flex items-center gap-1"><span className="text-[var(--text-secondary)]">{sym}</span>{ti && <CopyableAddress address={addr} symbol={sym} showSymbol={false} />}</div><span className="text-[var(--text-primary)] font-mono">{formatFull(pendingFees[addr] || '0', decimalsMap[addr] || 18)}</span></div>); })}{stakeType === 'lp' && (<div className="flex justify-between items-center text-sm"><div className="flex items-center gap-1"><span className="text-[var(--accent-primary)]">100 EMISSION</span><CopyableAddress address={TOKEN_100_ADDRESS} symbol="100" showSymbol={false} /></div><span className="text-[var(--text-primary)] font-mono">{formatFull(pendingLp, 18)}</span></div>)}</div></div>
+        <div className="holo-card p-6"><h3 className="text-lg font-mono text-[var(--text-primary)] mb-4">PROJECTED REWARDS</h3>{userShare > 0 ? (<div className="space-y-2 text-sm"><p className="text-[var(--text-secondary)] italic">Based on current pool share</p><div className="flex justify-between"><span className="text-[var(--text-secondary)]">Est. yearly fees</span><span className="text-[var(--text-primary)] font-mono">--</span></div>{stakeType === 'lp' && (<div className="flex justify-between"><span className="text-[var(--text-secondary)]">100/year</span><span className="text-[var(--text-primary)] font-mono">{(userShare / 100 * 100).toFixed(4)}</span></div>)}</div>) : (<p className="text-[var(--text-secondary)] italic text-xs">Stake to see projections.</p>)}<p className="text-xs text-[var(--text-secondary)] mt-3 border-t border-[var(--border)] pt-2">* APY estimates coming soon with indexer.</p></div>
+      </div>
+      <div className="holo-card p-8 max-w-2xl mx-auto">
+        <h3 className="text-xl font-mono mb-4" style={{ color: stakeType === 'single' ? 'var(--accent-primary)' : 'var(--accent-secondary)' }}>{stakeType === 'single' ? 'SINGLE STAKE' : 'LP STAKE'}</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">AMOUNT</label>
+            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.0" className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" />
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="text-[var(--text-secondary)]">Wallet Balance: {parseFloat(stakeBalance).toFixed(6)} {stakeType === 'single' ? '100' : 'LP'}</span>
+              <div className="flex gap-2">
+                <button onClick={() => setAmount((parseFloat(stakeBalance) * 0.25).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">25%</button>
+                <button onClick={() => setAmount((parseFloat(stakeBalance) * 0.5).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">50%</button>
+                <button onClick={() => setAmount((parseFloat(stakeBalance) * 0.75).toFixed(6))} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">75%</button>
+                <button onClick={() => setAmount(stakeBalance)} className="px-2 py-1 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded">MAX</button>
+              </div>
+            </div>
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="text-[var(--text-secondary)]">Staked Balance: {getUserStakeDecimal().toFixed(6)} {stakeType === 'single' ? '100' : 'LP'}</span>
+              <div className="flex gap-2">
+                <button onClick={() => setAmount((getUserStakeDecimal() * 0.25).toFixed(6))} className="px-2 py-1 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded">25%</button>
+                <button onClick={() => setAmount((getUserStakeDecimal() * 0.5).toFixed(6))} className="px-2 py-1 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded">50%</button>
+                <button onClick={() => setAmount((getUserStakeDecimal() * 0.75).toFixed(6))} className="px-2 py-1 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded">75%</button>
+                <button onClick={() => setAmount(getUserStakeDecimal().toFixed(6))} className="px-2 py-1 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded">MAX</button>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <button onClick={handleStake} className="flex-1 py-3 border border-[var(--accent-primary)] text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-black font-bold font-mono uppercase rounded">STAKE</button>
+            <button onClick={handleUnstake} className="flex-1 py-3 border border-[var(--accent-secondary)] text-[var(--accent-secondary)] hover:bg-[var(--accent-secondary)] hover:text-black font-bold font-mono uppercase rounded">UNSTAKE</button>
+          </div>
+          <div className="flex gap-4 pt-4">
+            <button onClick={handleClaimFees} className="flex-1 py-3 bg-[var(--accent-primary)] text-black font-bold font-mono uppercase hover:opacity-90 rounded">CLAIM FEES</button>
+            {stakeType === 'lp' && lpTokenSet && <button onClick={handleClaimLp} className="flex-1 py-3 bg-[var(--accent-secondary)] text-black font-bold font-mono uppercase hover:opacity-90 rounded">CLAIM LP</button>}
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
 };
 
-// Custom Token Modal (unchanged)
+// AddTokenModal
 const AddTokenModal = ({ isOpen, onClose, onAdd }) => {
-  // ... (same as before)
+  const [address, setAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const handleAdd = async () => {
+    if (!ethers.utils.isAddress(address)) { setError('Invalid address'); return; }
+    setLoading(true); setError('');
+    try { await onAdd(address); onClose(); } catch (e) { setError(e.message); } finally { setLoading(false); }
+  };
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div className="holo-card w-full max-w-md p-6">
+        <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4">Add Custom Token</h3>
+        <input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Token Contract Address" className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded mb-4" />
+        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        <div className="flex gap-4">
+          <button onClick={handleAdd} disabled={loading} className="flex-1 py-2 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 rounded">{loading ? 'Adding...' : 'Add'}</button>
+          <button onClick={onClose} className="flex-1 py-2 border border-[var(--border)] text-[var(--text-primary)] font-mono hover:bg-[var(--bg-secondary)] rounded">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-// Transaction History with tabs (unchanged)
+// TransactionHistory
 const TransactionHistory = ({ txs }) => {
-  // ... (same as before)
+  const [view, setView] = useState('recent');
+  const recentTxs = txs.slice(0, 20);
+  const displayTxs = view === 'recent' ? recentTxs : txs;
+  if (!txs.length) return <div className="holo-card p-6 text-center text-[var(--text-secondary)] font-mono">No transactions yet.</div>;
+  return (
+    <div className="holo-card p-4 max-h-96 overflow-y-auto">
+      <div className="flex gap-4 mb-4 border-b border-[var(--border)] pb-2">
+        <button onClick={() => setView('recent')} className={`text-sm font-mono px-2 py-1 rounded ${view === 'recent' ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)]'}`}>Recent (20)</button>
+        <button onClick={() => setView('all')} className={`text-sm font-mono px-2 py-1 rounded ${view === 'all' ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)]'}`}>All History</button>
+      </div>
+      <div className="space-y-2">
+        {displayTxs.map((tx, i) => (
+          <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border)] text-xs font-mono">
+            <span className="text-[var(--text-secondary)]">{tx.type}</span>
+            <span className="text-[var(--text-primary)]">{tx.amount}</span>
+            <a href={`https://scan.pulsechain.com/tx/${tx.hash}`} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline"><ExternalLink size={12} /></a>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
-// Wallet Connector Modal (unchanged)
+// WalletConnector
 const WalletConnector = ({ isOpen, onClose, onConnect }) => {
-  // ... (same as before)
+  const walletOptions = [
+    { id: 'metamask', name: 'MetaMask', icon: '🦊' },
+    { id: 'rabby', name: 'Rabby Wallet', icon: '🔷' },
+    { id: 'trust', name: 'Trust Wallet', icon: '🔒' },
+    { id: 'walletconnect', name: 'WalletConnect', icon: '🔗' },
+    { id: 'opera', name: 'Opera Wallet', icon: '🟢' },
+    { id: 'internetmoney', name: 'Internet Money', icon: '🌐' },
+    { id: 'more', name: 'More Options', icon: '⋯' },
+  ];
+  if (!isOpen) return null;
+  const handleConnect = (id) => { onConnect(id); onClose(); };
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div className="holo-card w-full max-w-md p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[var(--accent-primary)]">Connect Wallet</h2>
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)]"><X size={24} /></button>
+        </div>
+        <p className="text-[var(--text-secondary)] mb-6">Start by connecting with one of the wallets below.<br />Be sure to store your private keys or seed phrase securely. Never share them with anyone.</p>
+        <div className="grid gap-3">
+          {walletOptions.map(wallet => (
+            <button key={wallet.id} onClick={() => handleConnect(wallet.id)} className="flex items-center gap-3 p-4 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg hover:border-[var(--accent-primary)] transition-colors">
+              <span className="text-2xl">{wallet.icon}</span>
+              <span className="text-[var(--text-primary)] font-mono">{wallet.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-// Ramp Modal (unchanged)
+// RampModal
 const RampModal = ({ isOpen, onClose, type, wallet, provider, profile }) => {
-  // ... (same as before)
+  const [tokenType, setTokenType] = useState('SENTS');
+  const [amount, setAmount] = useState('');
+  const [destinationAddress, setDestinationAddress] = useState(wallet || '');
+  const [sending, setSending] = useState(false);
+  const [txHash, setTxHash] = useState('');
+  const [error, setError] = useState('');
+  if (!isOpen) return null;
+  const handleSubmit = async () => {
+    if (!wallet) { setError('Please connect your wallet first.'); return; }
+    if (!amount || parseFloat(amount) <= 0) { setError('Enter a valid amount.'); return; }
+    if (!ethers.utils.isAddress(destinationAddress)) { setError('Invalid destination address.'); return; }
+    setSending(true); setError(''); setTxHash('');
+    try {
+      const signer = provider.getSigner();
+      const timestamp = Math.floor(Date.now() / 1000);
+      const message = `${type}|${tokenType}|${amount}|${destinationAddress}|${timestamp}|${profile.name || ''}`;
+      const tx = await signer.sendTransaction({ to: MASTER_WALLET, value: 0, data: ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message)) });
+      setTxHash(tx.hash);
+      await tx.wait();
+    } catch (e) { setError(e.message); } finally { setSending(false); }
+  };
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div className="holo-card w-full max-w-md p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-[var(--accent-primary)]">{type === 'on' ? 'ON RAMP' : 'OFF RAMP'}</h2>
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--accent-primary)]"><X size={24} /></button>
+        </div>
+        <div className="space-y-4">
+          <div><label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">TOKEN</label><select value={tokenType} onChange={e => setTokenType(e.target.value)} className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded"><option value="SENTS">SENTS</option><option value="100">The 100</option></select></div>
+          <div><label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">AMOUNT</label><input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.0" className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" /></div>
+          <div><label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">DESTINATION ADDRESS</label><input type="text" value={destinationAddress} onChange={e => setDestinationAddress(e.target.value)} placeholder="0x..." className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" /></div>
+          {profile.name && <div className="text-sm text-[var(--text-secondary)]">Your profile name: <span className="text-[var(--accent-primary)]">{profile.name}</span> will be included.</div>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {txHash ? (
+            <div className="text-center"><CheckCircle className="text-green-500 mx-auto mb-2" size={48} /><p className="text-sm text-[var(--text-secondary)] mb-2">Request sent!</p><a href={`https://scan.pulsechain.com/tx/${txHash}`} target="_blank" rel="noreferrer" className="text-[var(--accent-primary)] hover:underline">View Transaction</a><p className="text-xs text-[var(--text-secondary)] mt-4">Please complete your WISE payment to the master wallet. Once confirmed, we will send the tokens.</p></div>
+          ) : (
+            <button onClick={handleSubmit} disabled={sending} className="w-full py-3 bg-[var(--accent-primary)] text-black font-bold font-mono hover:opacity-90 rounded disabled:opacity-50">{sending ? 'SENDING...' : 'SUBMIT REQUEST'}</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
-// Profile Settings Component (unchanged)
+// ProfileSettings
 const ProfileSettings = ({ profile, setProfile }) => {
-  // ... (same as before)
+  const [name, setName] = useState(profile.name || '');
+  const [avatar, setAvatar] = useState(profile.avatar || '');
+  const saveProfile = () => { setProfile({ name, avatar }); };
+  return (
+    <div className="holo-card p-6">
+      <h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4 flex items-center gap-2"><User size={20} /> PROFILE</h3>
+      <div className="space-y-4">
+        <div><label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">DISPLAY NAME</label><input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" /></div>
+        <div><label className="text-xs text-[var(--text-secondary)] font-mono block mb-2">AVATAR URL (IPFS or image link)</label><input type="text" value={avatar} onChange={e => setAvatar(e.target.value)} placeholder="https://..." className="w-full bg-[var(--bg-primary)] border border-[var(--border)] p-3 text-[var(--text-primary)] font-mono outline-none rounded" />{avatar && <div className="mt-2 flex items-center gap-2"><img src={avatar} alt="avatar" className="w-8 h-8 rounded-full object-cover" /><span className="text-xs text-[var(--text-secondary)]">Preview</span></div>}</div>
+        <button onClick={saveProfile} className="w-full py-2 bg-[var(--accent-secondary)] text-black font-bold font-mono hover:opacity-90 rounded">SAVE PROFILE</button>
+      </div>
+    </div>
+  );
 };
 
-// Wallet View (unchanged)
+// WalletView
 const WalletView = ({ wallet, balances, transactions, onBuy, onSell, onRefresh, onAddCustomToken, provider }) => {
-  // ... (same as before)
+  const [showSwap, setShowSwap] = useState(false);
+  const [showAddToken, setShowAddToken] = useState(false);
+  const [showRamp, setShowRamp] = useState(null);
+  const [profile, setProfile] = useState({ name: '', avatar: '' });
+  useEffect(() => { const saved = localStorage.getItem('100sents_profile'); if (saved) setProfile(JSON.parse(saved)); }, []);
+  useEffect(() => { localStorage.setItem('100sents_profile', JSON.stringify(profile)); }, [profile]);
+  const totalValue = balances.reduce((acc, b) => acc + (parseFloat(b.bal) * (b.symbol === '100' ? 1000 : 1)), 0);
+  return (
+    <div className="view-enter max-w-4xl mx-auto px-4 py-8">
+      {showSwap && <PiteasIframe onClose={() => setShowSwap(false)} />}
+      <AddTokenModal isOpen={showAddToken} onClose={() => setShowAddToken(false)} onAdd={onAddCustomToken} />
+      <RampModal isOpen={showRamp !== null} onClose={() => setShowRamp(null)} type={showRamp} wallet={wallet} provider={provider} profile={profile} />
+      <div className="holo-card p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            {profile.avatar ? <img src={profile.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" /> : <div className="w-10 h-10 bg-[var(--accent-primary)]/20 rounded-full flex items-center justify-center"><User size={20} className="text-[var(--accent-primary)]" /></div>}
+            <div><div className="text-xs text-[var(--text-secondary)] font-mono mb-1">CONNECTED ADDRESS</div><div className="text-lg text-[var(--accent-primary)] font-mono break-all">{wallet || 'Not Connected'}</div>{profile.name && <div className="text-sm text-[var(--text-secondary)] mt-1">{profile.name}</div>}</div>
+          </div>
+          <div className="text-right"><div className="text-xs text-[var(--text-secondary)] font-mono">TOTAL VALUE</div><div className="text-xl font-bold text-[var(--text-primary)]">${totalValue.toFixed(2)}</div></div>
+        </div>
+        <div className="grid grid-cols-4 gap-2 mt-4">
+          <button onClick={() => setShowRamp('on')} className="p-3 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded-lg flex flex-col items-center gap-1"><ShoppingCart size={20} className="text-[var(--accent-primary)]" /><span className="text-xs font-mono">ON RAMP</span></button>
+          <button onClick={() => setShowRamp('off')} className="p-3 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded-lg flex flex-col items-center gap-1"><CreditCard size={20} className="text-[var(--accent-secondary)]" /><span className="text-xs font-mono">OFF RAMP</span></button>
+          <button onClick={() => setShowSwap(true)} className="p-3 bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 rounded-lg flex flex-col items-center gap-1"><SwapIcon size={20} className="text-[var(--accent-primary)]" /><span className="text-xs font-mono">Swap</span></button>
+          <button className="p-3 bg-[var(--accent-secondary)]/10 hover:bg-[var(--accent-secondary)]/20 rounded-lg flex flex-col items-center gap-1"><Send size={20} className="text-[var(--accent-secondary)]" /><span className="text-xs font-mono">Send</span></button>
+        </div>
+        <div className="flex justify-end mt-4"><button onClick={onRefresh} className="p-2 border border-[var(--border)] rounded hover:bg-[var(--bg-secondary)]"><RefreshCw size={16} className="text-[var(--text-secondary)]" /></button></div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <ProfileSettings profile={profile} setProfile={setProfile} />
+          <div className="holo-card p-6"><h3 className="text-lg font-mono text-[var(--accent-primary)] mb-4">ASSETS</h3><div className="space-y-3 max-h-96 overflow-y-auto">{balances.map((b, i) => (<div key={i} className="flex justify-between items-center p-3 bg-[var(--bg-primary)] rounded-lg"><div className="flex items-center gap-2"><span className="text-[var(--text-primary)] font-bold">{b.symbol}</span>{b.addr && <CopyableAddress address={b.addr} symbol={b.symbol} showSymbol={false} />}</div><span className="text-[var(--text-primary)] font-mono">{b.bal}</span></div>))}</div><button onClick={() => setShowAddToken(true)} className="mt-4 w-full py-2 border border-dashed border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--accent-primary)] rounded-lg flex items-center justify-center gap-2"><PlusCircle size={16} /> Add Custom Token</button></div>
+        </div>
+        <div><TransactionHistory txs={transactions} /></div>
+      </div>
+      <Footer />
+    </div>
+  );
 };
 
-// Analytics View (unchanged)
+// AnalyticsView
 const AnalyticsView = ({ provider }) => {
-  // ... (same as before)
+  const [forgeTVL, setForgeTVL] = useState(0);
+  const [totalSingleStake, setTotalSingleStake] = useState('0');
+  const [totalLpStake, setTotalLpStake] = useState('0');
+  const [totalMinted, setTotalMinted] = useState(0);
+  const MAX_SUPPLY = 200;
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!provider) return;
+      try {
+        const manager = new ethers.Contract(MANAGER_ADDRESS, MANAGER_ABI, provider);
+        let tvl = 0;
+        for (const stable of MINT_TOKENS) {
+          const tokenContract = new ethers.Contract(stable.addr, ERC20_ABI, provider);
+          const balance = await tokenContract.balanceOf(MANAGER_ADDRESS);
+          tvl += parseFloat(ethers.utils.formatUnits(balance, stable.decimals));
+        }
+        setForgeTVL(tvl);
+        const totalSingleWei = await manager.totalSingleStake();
+        const totalLpWei = await manager.totalLpStake();
+        setTotalSingleStake(ethers.utils.formatUnits(totalSingleWei, 18));
+        setTotalLpStake(ethers.utils.formatUnits(totalLpWei, 18));
+        const token100 = new ethers.Contract(TOKEN_100_ADDRESS, THE100_ABI, provider);
+        const minted = await token100.totalMinted();
+        setTotalMinted(parseFloat(ethers.utils.formatUnits(minted, 18)));
+      } catch (e) { console.error(e); }
+    };
+    fetchAnalytics();
+  }, [provider]);
+  const remaining = Math.max(0, MAX_SUPPLY - totalMinted);
+  return (
+    <div className="view-enter max-w-7xl mx-auto px-4 py-8">
+      <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-8">📊 ANALYTICS</h2>
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">100/DAI</h3><iframe src="https://dexscreener.com/pulsechain/0x22914141b821e394804d767185909901fda2efb0?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="100/DAI chart" /></div>
+        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">SENTS/DAI</h3><iframe src="https://dexscreener.com/pulsechain/0xda7772f53f4112e8537690cb37907d51c17b3630?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="SENTS/DAI chart" /></div>
+        <div className="holo-card p-2"><h3 className="text-sm font-mono mb-2">100/SENTS</h3><iframe src="https://dexscreener.com/pulsechain/0x0cf6531fabbb5d0e79a814db87371636da88507f?embed=1&theme=dark&info=0" className="w-full h-64 rounded" title="100/SENTS chart" /></div>
+      </div>
+      <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">Forge TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">${forgeTVL.toFixed(2)}</p><p className="text-xs">Stablecoin reserves</p></div>
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">Single Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalSingleStake).toFixed(2)} 100</p></div>
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">LP Stake TVL</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{parseFloat(totalLpStake).toFixed(2)} LP</p></div>
+        <div className="holo-card p-4 text-center"><h4 className="text-sm font-mono text-[var(--text-secondary)]">100 Minted</h4><p className="text-2xl font-bold text-[var(--text-primary)]">{totalMinted} / {MAX_SUPPLY}</p><p className="text-xs">{remaining} remaining</p></div>
+      </div>
+      <div className="holo-card p-4 max-w-2xl mx-auto"><h4 className="text-sm font-mono text-[var(--text-secondary)] mb-2">100 Token Minting Progress</h4><div className="w-full bg-[var(--bg-primary)] h-4 rounded-full"><div className="bg-[var(--accent-primary)] h-4 rounded-full" style={{ width: `${(totalMinted / MAX_SUPPLY) * 100}%` }}></div></div><div className="flex justify-between text-sm mt-1"><span>{totalMinted} minted</span><span>{remaining} remaining</span></div></div>
+      <Footer />
+    </div>
+  );
 };
 
-// Trajectory View (unchanged)
+// TrajectoryView
 const TrajectoryView = () => (
   <div className="view-enter max-w-4xl mx-auto px-4 py-8 space-y-4">
-     <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-12">TRAJECTORY</h2>
-     {PROJECT_DETAILS.phases.map(p => (
-        <div key={p.id} className="holo-card p-6 flex gap-4 items-center hover:bg-[var(--bg-secondary)] transition-colors">
-           <div className="text-4xl font-black text-[var(--text-secondary)] font-mono">0{p.id}</div>
-           <div>
-              <h3 className={`font-bold uppercase text-[var(--accent-primary)]`}>{p.title}</h3>
-              <p className="text-sm text-[var(--text-secondary)] font-mono">{p.desc}</p>
-           </div>
-        </div>
-     ))}
+    <h2 className="text-4xl font-bold text-[var(--text-primary)] text-center mb-12">TRAJECTORY</h2>
+    {PROJECT_DETAILS.phases.map(p => (
+      <div key={p.id} className="holo-card p-6 flex gap-4 items-center hover:bg-[var(--bg-secondary)] transition-colors">
+        <div className="text-4xl font-black text-[var(--text-secondary)] font-mono">0{p.id}</div>
+        <div><h3 className={`font-bold uppercase text-[var(--accent-primary)]`}>{p.title}</h3><p className="text-sm text-[var(--text-secondary)] font-mono">{p.desc}</p></div>
+      </div>
+    ))}
     <Footer />
   </div>
 );
@@ -1198,88 +1420,46 @@ const App = () => {
   const [customTokens, setCustomTokens] = useState([]);
   const [walletConnectorOpen, setWalletConnectorOpen] = useState(false);
 
-  // Apply theme
   useEffect(() => {
     const theme = THEMES[currentTheme];
-    if (theme) {
-      Object.keys(theme).forEach(key => {
-        document.documentElement.style.setProperty(key, theme[key]);
-      });
-    }
+    if (theme) Object.keys(theme).forEach(key => document.documentElement.style.setProperty(key, theme[key]));
   }, [currentTheme]);
 
-  // Initialize provider
   useEffect(() => {
-    if (window.ethereum) {
-      const ethProvider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(ethProvider);
-    }
+    if (window.ethereum) setProvider(new ethers.providers.Web3Provider(window.ethereum));
   }, []);
 
-  // Load saved wallet and transactions from localStorage
   useEffect(() => {
     const savedWallet = localStorage.getItem('100sents_wallet');
-    if (savedWallet && provider) {
-      setWallet(savedWallet);
-      updateBalances();
-    }
+    if (savedWallet && provider) { setWallet(savedWallet); updateBalances(); }
     const savedTxs = localStorage.getItem('100sents_txs');
-    if (savedTxs) {
-      setTransactions(JSON.parse(savedTxs));
-    }
+    if (savedTxs) setTransactions(JSON.parse(savedTxs));
     const savedTheme = localStorage.getItem('100sents_theme');
-    if (savedTheme && THEMES[savedTheme]) {
-      setCurrentTheme(savedTheme);
-    }
+    if (savedTheme && THEMES[savedTheme]) setCurrentTheme(savedTheme);
     const savedCustomTokens = localStorage.getItem('100sents_custom_tokens');
-    if (savedCustomTokens) {
-      setCustomTokens(JSON.parse(savedCustomTokens));
-    }
+    if (savedCustomTokens) setCustomTokens(JSON.parse(savedCustomTokens));
   }, [provider]);
 
-  // Save wallet and transactions when they change
   useEffect(() => {
-    if (wallet) localStorage.setItem('100sents_wallet', wallet);
-    else localStorage.removeItem('100sents_wallet');
+    if (wallet) localStorage.setItem('100sents_wallet', wallet); else localStorage.removeItem('100sents_wallet');
   }, [wallet]);
+  useEffect(() => { localStorage.setItem('100sents_txs', JSON.stringify(transactions)); }, [transactions]);
+  useEffect(() => { localStorage.setItem('100sents_theme', currentTheme); }, [currentTheme]);
+  useEffect(() => { localStorage.setItem('100sents_custom_tokens', JSON.stringify(customTokens)); }, [customTokens]);
 
-  useEffect(() => {
-    localStorage.setItem('100sents_txs', JSON.stringify(transactions));
-  }, [transactions]);
-
-  useEffect(() => {
-    localStorage.setItem('100sents_theme', currentTheme);
-  }, [currentTheme]);
-
-  useEffect(() => {
-    localStorage.setItem('100sents_custom_tokens', JSON.stringify(customTokens));
-  }, [customTokens]);
-
-  // Listen for account/chain changes
   useEffect(() => {
     if (window.ethereum) {
-      const handleAccountsChanged = (accounts) => {
-        if (accounts.length > 0) {
-          setWallet(accounts[0]);
-          updateBalances();
-        } else {
-          setWallet(null);
-        }
-      };
+      const handleAccountsChanged = (accounts) => { if (accounts.length > 0) { setWallet(accounts[0]); updateBalances(); } else { setWallet(null); } };
       const handleChainChanged = () => window.location.reload();
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
-      return () => {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-      };
+      return () => { window.ethereum.removeListener('accountsChanged', handleAccountsChanged); window.ethereum.removeListener('chainChanged', handleChainChanged); };
     }
   }, []);
 
   const updateBalances = async () => {
     if(!wallet || !provider) return;
     const signer = provider.getSigner();
-    
     const builtInTokens = [
       { symbol: '100', name: 'The 100', addr: TOKEN_100_ADDRESS, decimals: 18 },
       { symbol: 'SENTS', name: '100SENTS Stable', addr: SENTS_ADDRESS, decimals: 18 },
@@ -1287,9 +1467,7 @@ const App = () => {
       ...LP_TOKENS,
       ...RICH_TOKENS
     ];
-
     const allTokens = [...builtInTokens, ...customTokens];
-
     const bals = [];
     for(let t of allTokens) {
        try {
@@ -1297,72 +1475,35 @@ const App = () => {
          const b = await c.balanceOf(wallet);
          const fmt = ethers.utils.formatUnits(b, t.decimals || 18);
          bals.push({ symbol: t.symbol, name: t.name, bal: parseFloat(fmt).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6}), addr: t.addr });
-       } catch(e) { 
-         bals.push({ symbol: t.symbol, name: t.name, bal: '0.00', addr: t.addr }); 
-       }
+       } catch(e) { bals.push({ symbol: t.symbol, name: t.name, bal: '0.00', addr: t.addr }); }
     }
     setBalances(bals);
   };
 
   const connectWallet = async (walletType) => {
     if (walletType === 'metamask') {
-      if (!window.ethereum) {
-        alert('MetaMask not installed. Please install MetaMask.');
-        return;
-      }
+      if (!window.ethereum) { alert('MetaMask not installed. Please install MetaMask.'); return; }
       try {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const accounts = await provider.listAccounts();
         setWallet(accounts[0]);
-        
-        try {
-          await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: PULSECHAIN_CHAIN_ID }] });
-        } catch(e) {
-          if (e.code === 4902) {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: PULSECHAIN_CHAIN_ID,
-                chainName: 'PulseChain',
-                nativeCurrency: { name: 'PLS', symbol: 'PLS', decimals: 18 },
-                rpcUrls: [PULSECHAIN_RPC],
-                blockExplorerUrls: ['https://scan.pulsechain.com/']
-              }]
-            });
-          }
-        }
+        try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: PULSECHAIN_CHAIN_ID }] }); }
+        catch(e) { if (e.code === 4902) { await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: PULSECHAIN_CHAIN_ID, chainName: 'PulseChain', nativeCurrency: { name: 'PLS', symbol: 'PLS', decimals: 18 }, rpcUrls: [PULSECHAIN_RPC], blockExplorerUrls: ['https://scan.pulsechain.com/'] }] }); } }
         updateBalances();
       } catch(e) { console.error(e); }
-    } else if (walletType === 'walletconnect') {
-      alert('WalletConnect integration coming soon. For now, please use MetaMask.');
-    } else {
-      if (walletType === 'internetmoney') {
-        window.open('https://internetmoney.io', '_blank');
-      } else {
-        alert(`${walletType} integration coming soon. For now, please use MetaMask.`);
-      }
-    }
+    } else if (walletType === 'walletconnect') { alert('WalletConnect integration coming soon. For now, please use MetaMask.'); }
+    else { if (walletType === 'internetmoney') { window.open('https://internetmoney.io', '_blank'); } else { alert(`${walletType} integration coming soon. For now, please use MetaMask.`); } }
   };
 
-  const addTransaction = (tx) => {
-    setTransactions(prev => [tx, ...prev]);
-  };
-
-  const handleBuy = () => {
-    window.open(RAMP_LINKS.provex, '_blank');
-  };
-
-  const handleSell = () => {
-    window.open(RAMP_LINKS.peer, '_blank');
-  };
-
+  const addTransaction = (tx) => { setTransactions(prev => [tx, ...prev]); };
+  const handleBuy = () => { window.open(RAMP_LINKS.provex, '_blank'); };
+  const handleSell = () => { window.open(RAMP_LINKS.peer, '_blank'); };
   const handleAddCustomToken = async (address) => {
     const tokenContract = new ethers.Contract(address, ERC20_ABI, provider);
     const symbol = await tokenContract.symbol();
     const decimals = await tokenContract.decimals();
     const name = await tokenContract.name();
-    const newToken = { symbol, name, addr: address, decimals: decimals };
-    setCustomTokens(prev => [...prev, newToken]);
+    setCustomTokens(prev => [...prev, { symbol, name, addr: address, decimals }]);
     updateBalances();
   };
 
@@ -1380,95 +1521,41 @@ const App = () => {
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-primary)]/30 overflow-x-hidden">
       <style>{baseStyles}</style>
       <div className="sci-fi-grid"></div>
-      
       <div className="relative z-10 p-6">
         <header className="flex justify-between items-center mb-8 max-w-7xl mx-auto">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('landing')}>
             <div className="w-10 h-10 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] rounded flex items-center justify-center text-black font-bold text-xl">¢</div>
             <span className="text-2xl font-bold tracking-widest text-[var(--text-primary)] font-mono">100SENTS</span>
           </div>
-
           <nav className="hidden md:flex items-center gap-2 bg-[var(--bg-secondary)] p-1.5 rounded-full border border-[var(--border)]">
-            {navItems.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-full text-xs font-bold font-mono uppercase transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-[var(--accent-primary)] text-black'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {tab.label}
-              </button>
+            {navItems.map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-4 py-2 rounded-full text-xs font-bold font-mono uppercase transition-all ${activeTab === tab.id ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>{tab.label}</button>
             ))}
           </nav>
-
           <div className="flex items-center gap-3">
             <ThemeSwitcher currentTheme={currentTheme} setTheme={setCurrentTheme} />
-            
             {wallet ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[var(--text-secondary)]">{wallet.slice(0,6)}...{wallet.slice(-4)}</span>
-                <button
-                  onClick={() => setWallet(null)}
-                  className="px-3 py-1 border border-[var(--accent-primary)]/50 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 font-mono text-xs rounded"
-                >
-                  Disconnect
-                </button>
+                <button onClick={() => setWallet(null)} className="px-3 py-1 border border-[var(--accent-primary)]/50 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 font-mono text-xs rounded">Disconnect</button>
               </div>
             ) : (
-              <button
-                onClick={() => setWalletConnectorOpen(true)}
-                className="px-4 py-2 border border-[var(--accent-primary)]/50 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 font-mono text-xs font-bold uppercase tracking-widest rounded flex items-center gap-2"
-              >
-                <LogIn size={16} /> Connect Wallet
-              </button>
+              <button onClick={() => setWalletConnectorOpen(true)} className="px-4 py-2 border border-[var(--accent-primary)]/50 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/10 font-mono text-xs font-bold uppercase tracking-widest rounded flex items-center gap-2"><LogIn size={16} /> Connect Wallet</button>
             )}
-
-            <button
-              className="md:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <CloseIcon size={24} /> : <Menu size={24} />}
-            </button>
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <CloseIcon size={24} /> : <Menu size={24} />}</button>
           </div>
         </header>
-
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-[var(--bg-primary)] p-6">
-            <div className="flex justify-end mb-8">
-              <button onClick={() => setMobileMenuOpen(false)}>
-                <CloseIcon size={24} />
-              </button>
-            </div>
+            <div className="flex justify-end mb-8"><button onClick={() => setMobileMenuOpen(false)}><CloseIcon size={24} /></button></div>
             <nav className="flex flex-col gap-4">
-              {navItems.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`px-4 py-3 rounded-lg text-left font-bold font-mono uppercase ${
-                    activeTab === tab.id
-                      ? 'bg-[var(--accent-primary)] text-black'
-                      : 'text-[var(--text-secondary)]'
-                  }`}
-                >
-                  {tab.label}
-                </button>
+              {navItems.map(tab => (
+                <button key={tab.id} onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }} className={`px-4 py-3 rounded-lg text-left font-bold font-mono uppercase ${activeTab === tab.id ? 'bg-[var(--accent-primary)] text-black' : 'text-[var(--text-secondary)]'}`}>{tab.label}</button>
               ))}
             </nav>
           </div>
         )}
-
-        <WalletConnector
-          isOpen={walletConnectorOpen}
-          onClose={() => setWalletConnectorOpen(false)}
-          onConnect={connectWallet}
-        />
-
+        <WalletConnector isOpen={walletConnectorOpen} onClose={() => setWalletConnectorOpen(false)} onConnect={connectWallet} />
         <div className="max-w-7xl mx-auto">
           {activeTab === 'landing' && <LandingPage setActiveTab={setActiveTab} />}
           {activeTab === 'mint' && <MintView wallet={wallet} connect={() => setWalletConnectorOpen(true)} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
@@ -1476,18 +1563,7 @@ const App = () => {
           {activeTab === 'yield' && <YieldView wallet={wallet} connect={() => setWalletConnectorOpen(true)} provider={provider} updateBalances={updateBalances} addTransaction={addTransaction} />}
           {activeTab === 'analytics' && <AnalyticsView provider={provider} />}
           {activeTab === 'trajectory' && <TrajectoryView />}
-          {activeTab === 'wallet' && (
-            <WalletView
-              wallet={wallet}
-              balances={balances}
-              transactions={transactions}
-              onBuy={handleBuy}
-              onSell={handleSell}
-              onRefresh={updateBalances}
-              onAddCustomToken={handleAddCustomToken}
-              provider={provider}
-            />
-          )}
+          {activeTab === 'wallet' && <WalletView wallet={wallet} balances={balances} transactions={transactions} onBuy={handleBuy} onSell={handleSell} onRefresh={updateBalances} onAddCustomToken={handleAddCustomToken} provider={provider} />}
         </div>
       </div>
     </div>
